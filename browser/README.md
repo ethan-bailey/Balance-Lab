@@ -46,3 +46,11 @@ rendering, pointer grab/move/release, blur cancellation, resizing, reload, finit
 rig bodies and no browser exceptions. The full A2 browser source-parity and M2
 baseline regression suites must also pass before any new preview deployment.
 Physical iPhone 16 Safari acceptance remains pending.
+
+### Playable active physics candidate
+
+`/lab/active.html` runs the authoritative A2 active Planck rig with the original
+Kite canvas art, finite-force grabs, A5 pointer cancellation and physically
+simulated recovery. The existing `/lab/` M2 preview is deliberately unchanged.
+Run `node browser/tests/active-preview-smoke.mjs` against a local build served on
+port 9021. The candidate is provisional until physical iPhone Safari QA.

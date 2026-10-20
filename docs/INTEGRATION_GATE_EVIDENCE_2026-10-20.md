@@ -74,3 +74,14 @@ Instrument actual joint IDs and relative velocities for the two failing forearm-
 - A5 input integration: `createRigGripBinding` + `attachCanvasPointerInput` handle pointer capture, move, release, blur cancellation, lost capture and zero synthetic flick. Stable M2 `lab.mjs` is untouched.
 - `node browser/tests/active-preview-smoke.mjs`: **PASS** on mobile Chromium 393×793 and rotated 793×393; real physical recovery for both facing orientations, pointer release and cancellation, resize/reload, zero browser errors. Separate `?rigqa=1` disables animation frame stepping for deterministic QA only.
 - New active playable path is a candidate, **not yet an accepted production preview**. Physical iPhone 16 Safari, sustained on-device performance and user interaction/art QA are **PENDING_DEVICE / PENDING_USER**.
+
+## A2 playable candidate / main consolidation
+
+- Opt-in `/lab/active.html` uses the authoritative `createActiveRigWorld` physics,
+  original Kite canvas art, shared A5 drag tracker and pointer-capture lifecycle.
+- Mobile Chromium `browser/tests/active-preview-smoke.mjs`: **PASS**; active
+  shove/recovery, actual step completion, grip/release, blur cancellation,
+  resize, reload, and mirrored recovery, with zero JavaScript errors.
+- The previously accepted M2 `/lab/` path remains unchanged and is a rollback.
+- The active candidate is a provisional playable preview, not yet physically
+  tested on iPhone Safari; no claim of full production acceptance.
