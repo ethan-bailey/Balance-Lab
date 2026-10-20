@@ -51,3 +51,11 @@ Post-solve callbacks record contact impulses; do not mutate physics entities ins
 
 ### 2026-10-20 continuation: M3 regression correction
 Recovered persistent sandbox from current named snapshot (which had progressed beyond the prior handoff). Preserved all untracked experimental files. `node --test tests/*.test.mjs` initially failed 1/18: `tests/rig-grip-binding.test.mjs` captured a mutable Planck Vec2 reference as the baseline hand position, so subsequent physics stepping changed the asserted baseline. Copied coordinates with `{...getPosition()}` instead. Both independent grip tests then passed, and the complete Node suite passed **18/18**. This is a test-fixture defect fix, not evidence that browser M3 is integrated. `node tests/long-idle.mjs` still reports torso x=-2.917857 m after 60 seconds: T01 no-creep remains FAILED. Real iPhone Safari, art approval and deployment integration remain deferred. No deployment or GitHub Actions usage.
+
+### 2026-10-20 autonomous continuation — M4 controlled recovery
+
+Read Library MASTER_PLAN.md and DEFERRED_TESTS.md; searched for named M2 release docs, which were not available in Library or restored sandbox. Verified Vercel deployment dpl_3oueY2oD6hpYRJ2oZ94BzEuZ7L2G READY; live /lab/ HTTP 200. No deployment changed. Preserved unrelated untracked files and M1 rollback.
+
+Created `active-planck-v6.mjs`: settled standing torque 8 Nm, short two-second 18 Nm post-catch recovery. v3 standing 18 Nm drifts 0.3357 m over five minutes; v4 standing 8 Nm drifts 0.1238 m over ten minutes but fails a light landing. v6 passes 600-second standing at x=-0.076878 m, 20/20 light drops (0.04–0.13 m), 800/800 seeded stress, and six v6-specific unit tests. The combined Node suite passed 31/31 before correcting a mislabeled v6 endurance test name. Detailed evidence in `M4_ACTIVE_BALANCE_EXPERIMENT_2026-10-20.md`.
+
+Known open failure: medium shove does not produce a physical corrective step (8/12 Ns simply stands; 16+ Ns eventually falls). T06 and final M4 acceptance remain pending. M3 browser touch integration, M5–M8, real iPhone Safari and art approval remain open. No GitHub Actions usage.
