@@ -35,3 +35,10 @@ Instrument actual joint IDs and relative velocities for the two failing forearm-
 - Browser uses the same **joint motor controller source**, but not yet the complete headless rig adapter, A1 motor telemetry or A5 DOM pointer module. The full end-to-end integration remains incomplete. Do not call this a pass or deploy.
 - Cherry-picked the two unique `automation/20261020-mobile-fixed-step-runtime` commits into the **same** integration branch as `205cdba` and `d53bf23`; they are retained as reusable runtime modules, not yet enabled in the M2 browser.
 - See `docs/BRANCH_POLICY.md`: no additional active development branches; historical branches retained read-only pending safe cleanup.
+
+### Final verification of current shared-controller source
+- **97/97** full Node tests PASS after adding shared motor contract test (including A2 recovery tests).
+- **800/800** canonical Planck 1.5.1 Node stress PASS, max anchor 0.011421842798 m, max limit 0.070176393982 rad.
+- Browser build PASS with checked `dist/lab/joint-motor.mjs` and Planck vendor module.
+- Browser full acceptance **798/800 FAIL** with shared controller and baseline motor cadence; same two forearm drag cases, so **no deployment**. The tested unsuccessful motor-substep experiments are not in the source branch.
+- Physical iPhone 16 performance and integrated A1 telemetry/A5 input remain release gates.
