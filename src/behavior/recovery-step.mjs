@@ -1,65 +1,108 @@
-/** Contact-verified physical step attempt.
- * Plans joint-local motor targets only. Foot/body translations remain solver owned.
- * A step is successful only if the foot lifts, travels and touches down while torso supported.
+/**
+ * Opt-in contact-recovery gait, governed by measured COM momentum.
+ * No body transforms, foot pins, or force injection: the controller emits
+ * joint-local angle references for the existing torque-limited Planck motors.
+ *
+ * An initial step is selected from the COM's signed lateral velocity;
+ * a faster capture trajectory requires an immediate rather than prepared
+ * swing. After a short knee/hip flexion the swing leg is extended toward a
+ * new support point. Physical lift and touchdown are checked independently
+ * of the command sequence.
  */
 export function createRecoveryStepController({
- triggerVelocity=.20,triggerMargin=.33,liftTimeout=.42,stepTimeout=1.3,cooldown=.65,mirroredLeftKnee=false,allowUnassistedRightSteps=false,rightHip=.5,rightKnee=-.35,rightLandHip=.1,rightLandKnee=0,swingSeconds=.30,
+ triggerVelocity=.20,triggerMargin=.33,quickVelocity=.32,facing=1,
+ prepareFrames=10,swingFrames=12,plantFrames=60,liftGraceFrames=24,
+ cooldownSeconds=4.5,minimumDisplacement=.06,
 }={}){
- if([triggerVelocity,triggerMargin,liftTimeout,stepTimeout,cooldown].some(v=>!Number.isFinite(v)||v<0))throw Error('Invalid step configuration');
- if(![rightHip,rightKnee,rightLandHip,rightLandKnee,swingSeconds].every(Number.isFinite)
- ||Math.abs(rightHip)> .85||rightKnee< -1.65||rightKnee>.15||Math.abs(rightLandHip)>.85
- ||rightLandKnee< -1.65||rightLandKnee>.15||swingSeconds<.05||swingSeconds>1)throw Error('Invalid rightward step targets');
- if(typeof mirroredLeftKnee!=='boolean'||typeof allowUnassistedRightSteps!=='boolean')throw Error('Invalid step safety configuration');
- let phase='idle',age=0,foot=null,direction=0,startX=0,liftSeen=false;
- let attempts=0,lifts=0,landings=0,failures=0,cooldownLeft=0,timeSinceAttempt=Infinity;
- function reset(failed){
+ const valid=[triggerVelocity,triggerMargin,quickVelocity,cooldownSeconds,minimumDisplacement];
+ if((facing!==1&&facing!==-1)||valid.some(v=>!Number.isFinite(v)||v<0)||
+    quickVelocity<=triggerVelocity||minimumDisplacement<.02||minimumDisplacement>.3)
+   throw Error('Invalid step configuration');
+ if(![prepareFrames,swingFrames,plantFrames,liftGraceFrames].every(v=>Number.isInteger(v)&&v>=0&&v<=240)||
+    swingFrames<1||plantFrames<1)throw Error('Invalid step frame count');
+
+ let phase='idle',framesLeft=0,cooldownLeft=0,foot=null,direction=0,startX=0;
+ let swingTargets=null,plantTargets=null,lastContact=false,liftSeen=false,landed=false;
+ let attempts=0,lifts=0,landings=0,completed=0,failures=0;
+ const empty={phase:'idle',targets:{}};
+
+ function finish(failed){
   if(failed)failures++;
-  phase='idle';cooldownLeft=cooldown;age=0;
+  else if(landed)completed++;
+  else failures++;
+  phase='idle';framesLeft=0;cooldownLeft=cooldownSeconds;
+  swingTargets=null;plantTargets=null;
  }
  function update({dt,support,parts,grabbed=false,torsoAngle=0,torsoHeight=1.3}){
-  if(!Number.isFinite(dt)||dt<=0||dt>.1||!support?.com||!parts||!Number.isFinite(torsoHeight))throw Error('Invalid step sensor');
-  age+=dt;timeSinceAttempt+=dt;cooldownLeft=Math.max(0,cooldownLeft-dt);
-  const feet=new Set(support.feet);
-  if(phase!=='idle'&&(grabbed||Math.abs(torsoAngle)>1.05||torsoHeight<.9||support.contactCount===0)){
-   reset(true);return {phase,targets:{}};
+  if(!Number.isFinite(dt)||dt<=0||dt>.1||!support?.com||!parts||
+    !Number.isFinite(torsoAngle)||!Number.isFinite(torsoHeight))throw Error('Invalid step sensor');
+  cooldownLeft=Math.max(0,cooldownLeft-dt);
+  const contacts=new Set(support.feet);
+  if(phase!=='idle'&&(grabbed||Math.abs(torsoAngle)>1.05||torsoHeight<.9)){
+   finish(true);return empty;
   }
   if(phase==='idle'){
-   const {com,margin}=support;
-   const riskMargin=support.captureMargin===null||support.captureMargin===undefined?margin:Math.min(margin,support.captureMargin);
-   if(cooldownLeft>0||support.contactCount!==2||Math.abs(com.vx)<triggerVelocity||riskMargin===null||riskMargin>=triggerMargin)return {phase,targets:{}};
+   const {com,margin,captureMargin}=support;
+   if(cooldownLeft>0||grabbed||torsoHeight<1.12||Math.abs(torsoAngle)>.65||
+      support.contactCount!==2||!Number.isFinite(com.vx))return empty;
+   const riskMargin=Number.isFinite(captureMargin)?Math.min(margin,captureMargin):margin;
+   if(!Number.isFinite(riskMargin)||Math.abs(com.vx)<triggerVelocity||riskMargin>=triggerMargin)return empty;
    direction=Math.sign(com.vx);
-   // The canonical left knee cannot yet perform a stable rightward recovery swing.
-   // Suppress the unsafe strategy and its immediate rebound until a validated geometry/controller exists.
-   if(direction>0&&!allowUnassistedRightSteps&&timeSinceAttempt>6){cooldownLeft=Math.max(cooldownLeft,2.5);return {phase,targets:{}};}
-   // Cross-step: moving the opposite-side swing leg supports motion in the impulse direction.
-   foot=direction<0?'R':'L';
-   const swing=parts.get('foot'+foot);
-   if(!swing)throw Error('Missing swing foot');
-   startX=swing.body.getPosition().x;
-   phase='lift';age=0;liftSeen=false;attempts++;timeSinceAttempt=0;
+   const bodyDirection=direction*facing;
+   foot=bodyDirection<0?'R':'L';
+   const body=parts.get('foot'+foot)?.body;
+   if(!body)throw Error('Missing swing foot');
+   startX=body.getPosition().x;
+   const quick=Math.abs(com.vx)>=quickVelocity;
+   // The asymmetry is a property of the currently verified hinged rig.
+   // Motion magnitudes are selected from physical COM speed, not a scripted impulse.
+   swingTargets=bodyDirection<0
+    ?{hipR:-.2*facing,kneeR:-.8*facing,ankleR:0}
+    :{hipL:(quick?.5:.7)*facing,kneeL:-.35*facing,ankleL:0};
+   plantTargets=bodyDirection<0
+    ?{hipR:.2*facing,kneeR:0,ankleR:0}
+    :{hipL:0,kneeL:0,ankleL:0};
+   lastContact=contacts.has('foot'+foot);
+   liftSeen=false;landed=false;
+   attempts++;
+   if(!quick&&prepareFrames){phase='prepare';framesLeft=prepareFrames;}
+   else {phase='swing';framesLeft=swingFrames;}
   }
-  const swingId='foot'+foot,body=parts.get(swingId)?.body;
-  if(!body)throw Error('Missing swing foot');
-  const footX=body.getPosition().x;
-  if(phase==='lift'&&!feet.has(swingId)){phase='swing';age=0;liftSeen=true;lifts++;}
-  if(phase==='lift'&&age>liftTimeout){reset(true);return {phase,targets:{}};}
-  if(phase==='swing'&&age>swingSeconds){phase='settle';age=0;}
-  if(phase==='settle'){
-   const landingTargets=foot==='R'?{hipR:-.1,kneeR:0,ankleR:0}:{hipL:rightLandHip,kneeL:rightLandKnee,ankleL:0};
-   const displacement=direction*(footX-startX);
-   if(liftSeen&&feet.has(swingId)){
-    if(displacement>.06&&torsoHeight>1.15){landings++;reset(false);}
-    else reset(true);
-    return {phase,targets:{}};
+  const currentFoot=parts.get('foot'+foot)?.body;
+  if(!currentFoot)throw Error('Missing swing foot');
+  const contact=contacts.has('foot'+foot);
+  if(lastContact&&!contact){liftSeen=true;lifts++;}
+  if(liftSeen&&!lastContact&&contact&&!landed){
+   const shift=direction*(currentFoot.getPosition().x-startX);
+   if(shift>minimumDisplacement&&torsoHeight>1.15){landed=true;landings++;}
+  }
+  lastContact=contact;
+
+  if(phase==='prepare'){
+   framesLeft--;
+   if(framesLeft===0){phase='swing';framesLeft=swingFrames;}
+   return {phase:'prepare',targets:{}};
+  }
+  if(phase==='swing'){
+   framesLeft--;
+   // Swing cannot advance into landing unless a real foot-contact loss occurred.
+   // Permit a short bounded extension for a slow liftoff, then fail safely.
+   if(framesLeft<=0){
+    if(liftSeen){phase='plant';framesLeft=plantFrames;}
+    else if(framesLeft < -liftGraceFrames){finish(true);return empty;}
    }
-   if(age>stepTimeout){reset(true);return {phase,targets:{}};}
-   return {phase,targets:landingTargets};
+   return {phase:'swing',targets:swingTargets};
   }
-  const hip='hip'+foot,knee='knee'+foot,ankle='ankle'+foot;
-  return {phase,targets:foot==='R'
-   ?{[hip]:.30,[knee]:-.8,[ankle]:0}
-    :{[hip]:mirroredLeftKnee?.1:rightHip,[knee]:mirroredLeftKnee?.8:rightKnee,[ankle]:0}};
+  if(phase==='plant'){
+   framesLeft--;
+   const targets=plantTargets;
+   if(framesLeft===0)finish(torsoHeight<1.15||!landed);
+   return {phase:'plant',targets};
+  }
+  return empty;
  }
- function diagnostics(){return {phase,foot,attempts,lifts,landings,failures};}
+ function diagnostics(){
+  return {phase,foot,attempts,lifts,landings,completed,failures};
+ }
  return {update,diagnostics};
 }

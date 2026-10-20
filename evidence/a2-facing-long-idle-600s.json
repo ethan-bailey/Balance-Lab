@@ -1,0 +1,26 @@
+{
+  "schema": "a2-facing-600s-opt-in-idle-v1",
+  "engine": "planck@1.5.1",
+  "fixedHz": 120,
+  "pass": true,
+  "cases": [
+    {
+      "facing": 1,
+      "pass": true,
+      "torsoX": -0.07687757779933238,
+      "torsoY": 1.3591223620349522,
+      "stepAttempts": 0,
+      "state": "standing",
+      "physicsSteps": 72000
+    },
+    {
+      "facing": -1,
+      "pass": true,
+      "torsoX": 0.08123945611320027,
+      "torsoY": 1.3590890090945138,
+      "stepAttempts": 0,
+      "state": "standing",
+      "physicsSteps": 72000
+    }
+  ]
+}

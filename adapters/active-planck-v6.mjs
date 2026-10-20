@@ -26,7 +26,7 @@ export function createActiveRigWorld(base=RIG){
  }
  function enableRecoverySteps(enabled=true,options={}){
   if(typeof enabled!=='boolean')throw Error('Invalid recovery step mode');
-  stepController=enabled?createRecoveryStepController(options):null;stepFrame=null;
+  stepController=enabled?createRecoveryStepController({facing:base.facing??1,...options}):null;stepFrame=null;
   installMotorController();
  }
  function installMotorController(){
@@ -83,7 +83,7 @@ export function createActiveRigWorld(base=RIG){
     stepFrame={...balanceReflex.update({support,torsoAngle:torso.getAngle(),
      torsoHeight:torso.getWorldCenter().y,grabbed,swingFoot:side}),...stepFrame};
    }
-   if(stepController&&stepController.diagnostics().phase!=='idle')config.motor.maxTorque=42;
+   if(stepFrame&&Object.keys(stepFrame).some(id=>Object.hasOwn(stepFrame,id)))config.motor.maxTorque=42;
    sensor.reset();rig.step();
    if(poseClip){poseTime+=FIXED_DT;fadeAge+=FIXED_DT;}
    impacts=sensor.snapshot();

@@ -39,3 +39,42 @@
 5. Obtain exact current M2 browser source, integrate through tested interface and perform independent Safari iPhone 16 device QA. Do not redeploy older site. Retain stable preview and M1 rollback.
 
 FAIL and PENDING are not blockers to independent engineering, but they prevent milestone acceptance.
+
+## Later 2026-10-20 checkpoint: canonical bilateral T06 now PASS (historical failures above retained)
+
+**Scope:** pinned Planck 1.5.1 Node active v6 rig with opt-in controller; not a statement of full A2 / production completion. The previous one-sided tests and parameter failures remain historical evidence; the new velocity-adaptive swing–plant sequence replaces those fixed targets.
+
+Algorithm:
+- Determine displacement risk from mass-weighted COM velocity and capture-point margin. Select a left/right swing limb from sensed lateral motion. At higher COM speed, begin moving immediately; otherwise allow ten 120Hz frames of preparation.
+- Drive a **12-frame torque-limited hip/knee swing**, then a **60-frame contact-seeking plant** through the existing Planck revolute motors. Preserve independent upper-body animation targets. Require sensor-observed liftoff before entering plant, and record touchdown only when the swing foot recontacts at least 6 cm in the actual displacement direction while torso supported.
+- Respect fixed 120Hz timing, checked bounds, grab cancellation, unsafe tilt/fall cancellation, limited work windows, and cooldown. No rigid-body teleport, synthetic foothold, or infinite motor authority. The same original motor adapter still allows stronger force to cause a physical fall.
+
+The stricter acceptance runner `node tests/a2-acceptance-gate.mjs` has **PASS** for all four canonical orientation medium shoves (-10,-8,+8,+10 N·s), each measured using an independent physical-contact observer, minimum post-one-second torso height, and 5 s of disturbance simulation. The full 56/56 Node regression suite passed after implementation.
+
+| World-X impulse (N·s) | Replanted foot | Independent touchdown frame (120Hz) | Furthest directed foot displacement | Minimum torso height from 1s onward | Result |
+|---:|---|---:|---:|---:|---|
+| -10 | footR | 19 | 0.09943 m | 1.35357 m | PASS; standing |
+| -8 | footR | 25 | 0.09126 m | 1.36090 m | PASS; standing |
+| +8 | footL | 34 | 0.17499 m | 1.36336 m | PASS; standing |
+| +10 | footL | 26 | 0.14999 m | 1.36350 m | PASS; standing |
+
+**Important remaining requirements:**
+- A whole-rig facing reflection `src/config/facing-rig.mjs` preserves no-input 60s and 600s upright stance, but current mirrored medium-shove step control has failures, particularly +10 N·s rightward. Mirroring just the left knee (prior experiment) is NOT valid and remains rejected.
+- T06 canonical Node subgate is closed. **Full A2 Gate remains PENDING/FAIL** until bidirectional tests in *both* physical facing orientations, torso/angular-momentum and foot-contact metrics, browser/Node parity for the integrated step system, physical iPhone 16 Safari QA, and the specified release gates are verified. See separate mirrored-facing evidence when available.
+- Current public M2 browser source is not in this isolated workspace. Do not overwrite the live preview or the accepted rollback with the older `/vercel/m2/site` artifact.
+
+### Opt-in stress and opposite-facing idle evidence
+- `node tests/active-recovery-stress.mjs 800`: **800/800 numerical stress PASS** with the revised bilateral motor planner, max joint-anchor error 0.007914 m, max limit violation 0.054252 rad, 2,133 observed foot-contact losses, 508 physically shifted foot touchdowns, and 656 falls under a wide seeded impact sweep (up to 35 N·s); falls are legitimate, not numerical errors. Evidence: `evidence/a2-opt-in-step-stress-800.json`. This is not a 800/800 successful recovery claim.
+- `evidence/a2-facing-long-idle-600s.json`: **both physics-facing orientations** hold 600 seconds (72,000 solver ticks) without a spontaneous step or falling. Facing +1: torso x -0.076878, y 1.359122 m; facing -1: torso x +0.081239, y 1.359089 m. This does not establish mirrored medium-shove acceptance.
+- `src/config/facing-rig.mjs` represents a full reflection of limb positions, anchors and signed joint limits. It is distinct from the unsafe *single-knee* mirroring experiment. Mirrored disturbance recovery is still being verified separately.
+
+### Independent full facing reflection gate (explicit FAIL)
+The new optional `createFacingRig(...,-1)` reflects **all** 2D segment origins and revolute anchors and switches signed joint limits together. Unlike the former single-knee experiment, it passes standing for 60s and 600s at 120Hz with opt-in recovery enabled (x=+0.081239 m at 600s, no unsolicited steps).
+
+The strict runner now accepts `--facing=-1` without relaxing any touchdown or torso-stability criteria. `node tests/a2-acceptance-gate.mjs --facing=-1` exits **1**, with:
+- -10 N·s: PASS (contact-verified step, upright)
+- -8 N·s: FAIL (eventual fall)
+- +8 N·s: FAIL (eventual fall)
+- +10 N·s: FAIL (eventual fall)
+
+Evidence: `evidence/a2-reversed-facing-unaccepted.json`. Motor phase and stance-gain sweeps for the harder mirrored +10 case have not yet produced a 5-second upright result, although some recoveries initially contact the ground. This is **still an open controller/stance geometry defect**, not a user-only blocker. The **canonical-facing T06 is passed; complete A2 facing sweep is NOT accepted**. No changes were deployed.

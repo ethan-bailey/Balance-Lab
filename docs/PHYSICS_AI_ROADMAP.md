@@ -150,3 +150,6 @@ The contributor-facing authoritative rule is AGENTS.md, section "Cost-efficient 
 
 ### A2 verification checkpoint — 2026-10-20 (NOT SIGNED OFF)
 Read docs/A2_PHYSICS_ANIMATION_INTEGRATION_2026-10-20.md. A single -8 N·s leftward physical catch step passes with simultaneous animated upper-body pose; bilateral T06 and stronger disturbances FAIL. Retain tested controller behind opt-in; do not promote A2 to complete until strict bilateral acceptance succeeds.
+
+### A2 incremental gate result — 2026-10-20 (canonical T06 passed; whole A2 still OPEN)
+Node opt-in `tests/a2-acceptance-gate.mjs` now passes **four contact-verified medium shoves in the canonical facing** after 5s each, with concurrent upper-body animation, true ground-contact liftoff/touchdown and sustained upright state. See `docs/A2_PHYSICS_ANIMATION_INTEGRATION_2026-10-20.md`. Do not sign off A2 until alternate facing orientation and full browser/Node/mobile gates pass.
