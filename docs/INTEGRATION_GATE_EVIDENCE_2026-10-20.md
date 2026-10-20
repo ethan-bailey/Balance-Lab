@@ -136,3 +136,10 @@ User clarified that side profile means a **side-scrolling human silhouette** com
 Measured Reach/Guard hand coordinates and corrected animation reference targets. Reach now places a real hand ~0.88 m forward, Guard both hands in front of torso, both facings. Added opt-in experimental ankle/hip Balance Assist toggle; baseline 10/16 falls vs Assist 1/16 across deterministic ±8 N·s, six-second trials, with strong 25 N·s shove still causing a fall. **Assist remains OFF by default** because enabling it globally regressed existing mirrored/sequence browser acceptance. Node 121/121 PASS; 800/800 stress PASS; both strict A2 PASS; Chromium active parity, playable smoke, gestures, side-view, assist A/B all PASS. Physical Safari acceptance pending. See `docs/GESTURE_AND_BALANCE_FEEDBACK_GATE_2026-10-20.md`.
 
 - Gesture/balance A/B preview deployed from `320e217ceaa03ef635ca13212d20e722bd4ef1bc`: `dpl_48Ruy36eKsXgjMd1cG8SHNj4CPf5` READY; `https://sling-lab-play-fn26kfzq3-ethanbaileymarsh-8332.vercel.app/lab/active.html`. HTTP 200 for page and all required modules; production alias unchanged.
+
+## B1 stronger and smoother balance-control gate
+
+- Research, precommitted B0/B1/B2/B3 criteria, simulator matrices, accepted/rejected sweeps and held-out results: `docs/BALANCE_CONTROL_RESEARCH_AND_EXECUTION_2026-10-20.md`.
+- New Strong: 6/64 development falls, 20/80 held-out vs old Assist 10/64 and 27/80. New Smooth: 7/64 development, 25/80 held-out, with 41% less development torso angular variation and 38% less held-out variation. Both resist all 16 ±8 N·s test shoves, both still fall under 35 N·s.
+- 126/126 Node PASS; 800/800 stress PASS; strict A2 both facings PASS; mobile Chromium existing gates, new profile selector and remote live profile browser PASS. Zero JS errors.
+- Verified isolated preview from code SHA `e8b661cd9ac3d7076c1e4f48ae341b53b7f18148`, deployment `dpl_DJe9KQs9oC6hYiMktFmZzH7qospu` READY: `https://sling-lab-play-dy2lb2j1u-ethanbaileymarsh-8332.vercel.app/lab/active.html`. Production alias unchanged; physical Safari pending.

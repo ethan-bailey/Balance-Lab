@@ -57,3 +57,14 @@ Only after B2: record motor/COM/contact observations and reference poses; train 
 ## Rollout and operational rules
 
 Test locally in sandbox first, preserve all user work, commit code+tests+evidence, deploy **one isolated preview** only after gates pass. No GitHub Actions or automatic Vercel deploys. Do not promote to production until actual iPhone 16 Safari QA. No claim of natural human-level balance, real locomotion or a trained policy from the B1 gate.
+
+## B1 verified release evidence
+
+- Tested and deployed source commit: `e8b661cd9ac3d7076c1e4f48ae341b53b7f18148`.
+- 126/126 Node tests PASS, strict A2 gates both facings PASS, 800/800 Planck stress PASS, identity check PASS, browser build PASS.
+- Mobile Chromium (393×793, DPR 2): existing idle/touch/recovery smoke PASS, gesture sequence PASS, profile drawing PASS, balance A/B PASS, new Strong/Smooth selector and both physical response modes PASS, active A2 source parity PASS, zero page errors.
+- Isolated Vercel preview `dpl_DJe9KQs9oC6hYiMktFmZzH7qospu`, state READY: `https://sling-lab-play-dy2lb2j1u-ethanbaileymarsh-8332.vercel.app/lab/active.html`.
+- Live HTTP 200 for active HTML, active browser module, reflex source, active Planck adapter and pinned Planck vendor; HTML contains the Strong selector and served controller contains the 28-torque Smooth floor.
+- **Live deployment Chromium** (not only localhost) executed the profile switch, reset and 8 N·s shove: both Strong and Smooth stayed standing; no browser errors. Physical iPhone Safari testing is still outstanding.
+- The stable production alias was **not changed**. The old steps-only baseline remains selectable.
+- No trained policy, true anatomical sagittal rig, or directional walking is claimed as complete.
