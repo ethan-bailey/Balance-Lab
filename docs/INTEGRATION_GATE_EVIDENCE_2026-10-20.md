@@ -59,3 +59,11 @@ Instrument actual joint IDs and relative velocities for the two failing forearm-
 - T01 no-input 600-second stance: **2/2 PASS**, 72,000 physical steps per orientation, zero unwanted steps. Light-catch ±3/±5 N·s: **8/8 PASS**, zero unwanted steps. T07 severe ±35 N·s: **4/4 PASS**, actual falls.
 - Full Node unit/integration suite **104/104 PASS**; canonical rig 800/800 stress PASS. Browser M2 full stress **800/800 PASS**, five parity cases PASS, touch/resize/reload PASS, zero browser errors.
 - Explicit limitation: browser M2 test is a separate engine path and does **not** yet validate A2 active controller. Full A2 and new deployment remain **BLOCKED** on active-source browser parity and physical iPhone QA. No release/deployment was made.
+
+## A2 active physics browser parity verified
+
+- `src/qa/a2-physical-gate.mjs`: shared executable A2 contact acceptance, called without altered thresholds in Node and Chromium.
+- `cd browser && node build.mjs`: PASS; pinned Planck 1.5.1 browser ESM, active source copied without gameplay rewrites. Test-only `/active-qa.html` entry does not change playable M2.
+- `node browser/tests/active-a2-browser-gate.mjs` (candidate served on 9021): **8/8 PASS**, both facings, actual liftoff/displaced touchdown, sustained posture/support, max Node/Chromium torso-height delta ~2.31e-9 m, max angle delta ~2.69e-12 rad, zero JS errors.
+- Existing `node browser/tests/full-browser-gate.mjs` (candidate 9021, baseline 9001): **800/800 PASS**, five parity checks PASS, touch/resize/reload PASS, no JS errors.
+- Full Node suite after extraction: **104/104 PASS**. A2 Node physical and active-source Chromium acceptance: **INTEGRATED_PASS for physics QA only**. Active playable renderer/pointer integration: **TODO**; physical iPhone Safari: **PENDING_DEVICE**. Stable preview unchanged; no deployment.
