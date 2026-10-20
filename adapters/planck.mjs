@@ -23,7 +23,7 @@ export function createRigWorld(config=RIG){
     const joint=world.createJoint(P.RevoluteJoint({enableLimit:true,lowerAngle:def.lower,upperAngle:def.upper,collideConnected:false},A,B,anchor));
     links.push({def,joint,A,B,localA:A.getLocalPoint(anchor),localB:B.getLocalPoint(anchor)});
   }
-  let grip=null,steps=0;
+  let grip=null,steps=0,poseController=null;
   const metrics={maxAnchorErrorM:0,maxLimitViolationRad:0,maxMotorTorqueNm:0,nonfinite:0,steps:0,groundedSteps:0,grabSteps:0,clampedImpulses:0};
   function footContact(){
     for(let c=world.getContactList();c;c=c.getNext()){
@@ -42,11 +42,17 @@ export function createRigWorld(config=RIG){
       for(const {def,joint,A,B} of links){
         const rel=joint.getJointAngle(),vel=B.getAngularVelocity()-A.getAngularVelocity();
         let desired=clamp((-config.motor.kp*wrap(rel)-config.motor.kd*vel)*config.motor.speedGainScale,-config.motor.maxSpeed,config.motor.maxSpeed);
+        const commanded=poseController?.({id:def.id,angle:rel,angularVelocity:vel});
+        if(commanded!==undefined){
+          if(!commanded||![commanded.speed,commanded.maxTorque].every(Number.isFinite)||commanded.maxTorque<0)throw Error('Invalid pose motor command');
+          desired=clamp(commanded.speed,-config.motor.maxSpeed,config.motor.maxSpeed);
+        }
         const guard=config.motor.limitGuard,upper=rel>joint.getUpperLimit()-guard&&vel>0,lower=rel<joint.getLowerLimit()+guard&&vel<0;
         if(upper)desired=Math.min(desired,-clamp((rel-joint.getUpperLimit()+guard)*24+vel*.8,0,3));
         if(lower)desired=Math.max(desired,clamp((joint.getLowerLimit()+guard-rel)*24-vel*.8,0,3));
         joint.enableMotor(true);joint.setMotorSpeed(desired);
-        joint.setMaxMotorTorque((def.id.startsWith('wrist')?config.motor.wristMaxTorque:config.motor.maxTorque)*(upper||lower?1:activation));
+        const normalLimit=(def.id.startsWith('wrist')?config.motor.wristMaxTorque:config.motor.maxTorque)*(upper||lower?1:activation);
+        joint.setMaxMotorTorque(commanded===undefined?normalLimit:Math.min(normalLimit,commanded.maxTorque));
       }
       let highMotion=false;
       for(const {body} of parts.values())if(Math.abs(body.getAngularVelocity())>12||body.getLinearVelocity().length()>2.5){highMotion=true;break;}
@@ -80,6 +86,7 @@ export function createRigWorld(config=RIG){
     }
     return snapshot();
   }
+  function setPoseController(controller){if(controller!==null&&typeof controller!=='function')throw Error('Invalid pose controller');poseController=controller;}
   function snapshot(){
     const bodies={};for(const [id,{body}] of parts){const p=body.getPosition(),v=body.getLinearVelocity();bodies[id]={x:p.x,y:p.y,a:body.getAngle(),vx:v.x,vy:v.y,w:body.getAngularVelocity()};}
     return {bodies,grounded:footContact(),steps,metrics:{...metrics}};
@@ -100,5 +107,5 @@ export function createRigWorld(config=RIG){
     if(m>max){x*=max/m;y*=max/m;metrics.clampedImpulses++;}
     part.body.applyLinearImpulse(P.Vec2(x,y),part.body.getWorldCenter(),true);
   }
-  return {world,ground,parts,links,step,snapshot,footContact,grab,moveGrab,release,impulse,metrics};
+  return {world,ground,parts,links,step,snapshot,footContact,grab,moveGrab,release,impulse,setPoseController,metrics};
 }

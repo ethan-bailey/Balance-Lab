@@ -1,0 +1,4 @@
+ function grab(id,target,point){rig.grab(id,target,point);grabbed=true;}
+ function release(){rig.release();grabbed=false;}
+ return {rig,step,snapshot,grab,release,moveGrab:rig.moveGrab,impulse:rig.impulse,parts:rig.parts,metrics:rig.metrics};
+}

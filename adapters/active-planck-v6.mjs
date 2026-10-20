@@ -1,3 +1,5 @@
+import {samplePose} from '../src/animation/pose-sampler.mjs';
+import {poseMotorCommand} from '../src/actuation/pose-motor.mjs';
 import {RIG} from '../rig-config.mjs';
 import {createRigWorld,FIXED_DT} from './planck.mjs';
 import {attachFootImpactSensor} from '../src/physics/contact-impulses.mjs';
@@ -7,10 +9,26 @@ export function createActiveRigWorld(base=RIG){
  const config={...base,motor:{...base.motor}},rig=createRigWorld(config);
  const sensor=attachFootImpactSensor(rig.world,rig.ground,rig.parts),state=createBalanceState();
  let grabbed=false,priorFeet=new Set(),priorVy={footL:0,footR:0},mode={mode:'airborne',age:0,canActuate:false};
- let recoverySeconds=0,impacts=sensor.snapshot(),support=estimateSupport(rig.world,rig.ground,rig.parts);
+ let poseClip=null,poseTime=0,poseLoop=false,recoverySeconds=0,impacts=sensor.snapshot(),support=estimateSupport(rig.world,rig.ground,rig.parts);
  const torque={standing:8,catching:24,stepping:20,airborne:18,tumbling:8,fallen:8,grabbed:10};
  const diagnostics={modeCounts:{},landingEvents:0,maxImpactSpeed:0};
 // continued
+ function setPoseClip(clip,{loop=false}={}){
+  if(clip!==null&&(!Array.isArray(clip)||!clip.length))throw Error('Invalid pose clip');
+  if(typeof loop!=='boolean')throw Error('Invalid loop mode');
+  if(clip!==null){
+   const known=new Set(rig.links.map(({def})=>def.id));
+   for(const id of Object.keys(clip[0].pose))if(!known.has(id))throw Error('Unknown pose joint '+id);
+  }
+  poseClip=clip;poseTime=clip?.[0].time??0;poseLoop=loop;
+  rig.setPoseController(clip===null?null:({id,angle,angularVelocity})=>{
+   const target=samplePose(poseClip,poseTime,{loop:poseLoop})[id];
+   return target===undefined?undefined:poseMotorCommand({angle,angularVelocity,targetAngle:target,
+    maxTorque:id.startsWith('wrist')?config.motor.wristMaxTorque:config.motor.maxTorque,
+    kp:config.motor.kp,kd:config.motor.kd,maxSpeed:config.motor.maxSpeed,
+    speedGainScale:config.motor.speedGainScale});
+  });
+ }
  function step(count=1){
   if(!Number.isInteger(count)||count<0||count>100000)throw Error('Invalid step count');
   for(let i=0;i<count;i++){
@@ -27,7 +45,7 @@ export function createActiveRigWorld(base=RIG){
    if(mode.mode==="catching")recoverySeconds=2;else recoverySeconds=Math.max(0,recoverySeconds-FIXED_DT);config.motor.maxTorque=mode.mode==="standing"&&recoverySeconds>0?18:torque[mode.mode];
    priorFeet=feet;
    for(const id of ['footL','footR'])priorVy[id]=rig.parts.get(id).body.getLinearVelocity().y;
-   sensor.reset();rig.step();impacts=sensor.snapshot();
+   sensor.reset();rig.step();if(poseClip)poseTime+=FIXED_DT;impacts=sensor.snapshot();
   }
   return snapshot();
  }
@@ -40,6 +58,6 @@ export function createActiveRigWorld(base=RIG){
  function getDiagnostics(){return {landingEvents:diagnostics.landingEvents,maxImpactSpeed:diagnostics.maxImpactSpeed,modeCounts:{...diagnostics.modeCounts}};}
  return {rig,step,snapshot,grab,release,moveGrab:rig.moveGrab,
   impulse:rig.impulse,parts:rig.parts,metrics:rig.metrics,
-  getState,getDiagnostics,getSupport(){return support;},
+  getState,getDiagnostics,setPoseClip,getSupport(){return support;},
   getImpacts(){return impacts;},dispose(){sensor.detach();}};
 }
