@@ -4,7 +4,7 @@
 
 **Current source authority:** `adapters/active-planck-v6.mjs` and `adapters/planck.mjs`; see `docs/LEGACY_INVENTORY.md` before touching versioned adapters. Historical `docs/history/` reports are evidence, not new instructions. Do not claim weapons, combat or trained humanlike balance are already implemented.
 
-**Primary execution plan:** docs/PHYSICS_AI_ROADMAP.md. **Mandatory integration and gate bookkeeping:** docs/INTEGRATION_WORKFLOW.md. Read it before any development, verification, refactor, review, merge or deployment. The original MASTER_PLAN.md and M0–M8 records are historical acceptance inputs where applicable, **not a competing project charter**.
+**Current balance-control gate:** `docs/BALANCE_CONTROL_RESEARCH_AND_EXECUTION_2026-10-20.md` (B0/B1 verified, B2 pending). **Primary execution plan:** docs/PHYSICS_AI_ROADMAP.md. **Mandatory integration and gate bookkeeping:** docs/INTEGRATION_WORKFLOW.md. Read it before any development, verification, refactor, review, merge or deployment. The original MASTER_PLAN.md and M0–M8 records are historical acceptance inputs where applicable, **not a competing project charter**.
 
 **Sandbox timeout rule:** On a session expiration or HTTP 410, recover the named Vercel sandbox from its latest snapshot and continue the active gate without asking the user. Follow `docs/SANDBOX_RECOVERY.md`.
 

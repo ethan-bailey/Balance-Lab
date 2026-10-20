@@ -2,8 +2,8 @@
  * Muscle controller decides actual torque, physics determines motion.
  */
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
-export function createBalanceReflex({ankleGain=0,hipGain=0,maxAnkle=.28,maxHip=.24,smoothingSeconds=0}={}){
- if(![ankleGain,hipGain,maxAnkle,maxHip,smoothingSeconds].every(Number.isFinite)||maxAnkle<0||maxHip<0||maxAnkle>1||maxHip>1||smoothingSeconds<0||smoothingSeconds>.5)throw Error('Invalid balance gain');
+export function createBalanceReflex({ankleGain=0,hipGain=0,maxAnkle=.28,maxHip=.24,smoothingSeconds=0,deadband=0}={}){
+ if(![ankleGain,hipGain,maxAnkle,maxHip,smoothingSeconds,deadband].every(Number.isFinite)||maxAnkle<0||maxHip<0||maxAnkle>1||maxHip>1||smoothingSeconds<0||smoothingSeconds>.5||deadband<0||deadband>.15)throw Error('Invalid balance gain');
  let smoothedError=null;
  function update({support,torsoAngle,torsoHeight,grabbed=false,swingFoot=null,dt=1/120}){
   if(!support?.com||!Number.isFinite(torsoAngle)||!Number.isFinite(torsoHeight)||!Number.isFinite(dt)||dt<=0||dt>.1)throw Error('Invalid balance sensing');
@@ -15,7 +15,7 @@ export function createBalanceReflex({ankleGain=0,hipGain=0,maxAnkle=.28,maxHip=.
   // reduces high-frequency torque-target reversals without adding fake forces.
   const alpha=smoothingSeconds===0?1:1-Math.exp(-dt/smoothingSeconds);
   smoothedError=smoothedError===null?rawError:smoothedError+alpha*(rawError-smoothedError);
-  const error=smoothedError;
+  const error=Math.abs(smoothedError)<=deadband?0:Math.sign(smoothedError)*(Math.abs(smoothedError)-deadband);
   const targets={};
   for(const side of ['L','R']){
    if(side===swingFoot||!support.feet.includes('foot'+side))continue;

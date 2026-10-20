@@ -15,6 +15,7 @@ export function createActiveRigWorld(base=RIG){
  let poseClip=null,poseTime=0,poseLoop=false,poseFrame=null,poseVelocityFrame=null,usePoseVelocity=false,loopBlendSeconds=0,stepFrame=null,stepController=null,balanceReflex=null,fadeOrigin=null,fadeVelocityOrigin=null,fadeAge=0,fadeSeconds=0,recoverySeconds=0,impacts=sensor.snapshot(),support=estimateSupport(rig.world,rig.ground,rig.parts);
  const torque={standing:8,catching:24,stepping:20,airborne:18,tumbling:8,fallen:8,grabbed:10};
  const diagnostics={modeCounts:{},landingEvents:0,maxImpactSpeed:0};
+ let reflexTorque=42,reflexTorqueFloor=42,reflexTorqueFiltered=42;
  let learnedPolicy=null,learnedIntent=DEFAULT_INTENT,learnedTargets=null,policyTicks=0;
  /** Opt-in policy must return 12 finite normalized joint residuals.
   * Gameplay intent and hand ownership are independent of balance policy output.
@@ -32,6 +33,14 @@ export function createActiveRigWorld(base=RIG){
   */
  function enableBalanceReflex(options=null){
   if(options!==null&&(!options||typeof options!=='object'))throw Error('Invalid balance options');
+  if(options!==null){
+   const requested=options.reflexTorque??42;
+   if(!Number.isFinite(requested)||requested<8||requested>42)throw Error('Invalid reflex torque cap');
+   reflexTorque=requested;
+   reflexTorqueFloor=options.reflexTorqueFloor??requested;
+   if(!Number.isFinite(reflexTorqueFloor)||reflexTorqueFloor<8||reflexTorqueFloor>requested)throw Error('Invalid reflex torque floor');
+   reflexTorqueFiltered=requested;
+  }
   balanceReflex=options===null?null:createBalanceReflex(options);
   installMotorController();
  }
@@ -116,7 +125,18 @@ export function createActiveRigWorld(base=RIG){
      protectedTargets,facing:base.facing??1,intent:learnedIntent});
     policyTicks++;
    }
-   if(stepFrame&&Object.keys(stepFrame).some(id=>Object.hasOwn(stepFrame,id)))config.motor.maxTorque=42;
+   if(stepFrame&&Object.keys(stepFrame).length){
+    const stepPhase=stepController?.diagnostics()?.phase;
+    // Recovery swing/plant must retain the established torque budget;
+    // standing reflexes use a separate bounded budget to avoid chatter.
+    const speed=Math.abs(support.com?.vx??0);
+    const risk=Math.max(0,Math.min(1,(speed-.10)/.17));
+    const requested=reflexTorqueFloor+(reflexTorque-reflexTorqueFloor)*risk;
+    // Recover torque quickly on a shove; release it gradually at rest.
+    const alpha=requested>reflexTorqueFiltered?0.65:0.03;
+    reflexTorqueFiltered+=(requested-reflexTorqueFiltered)*alpha;
+    config.motor.maxTorque=stepPhase&&stepPhase!=='idle'?42:reflexTorqueFiltered;
+   }
    sensor.reset();rig.step();
    if(poseClip){poseTime+=FIXED_DT;fadeAge+=FIXED_DT;}
    impacts=sensor.snapshot();
