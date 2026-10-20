@@ -25,3 +25,6 @@ The new `tests/a2-acceptance-gate.mjs` independently confirms physical foot lift
 
 ### 2026-10-20 mirrored-facing medium shove failure
 `node tests/a2-acceptance-gate.mjs --facing=-1` is a strict, reproducible FAIL (one of four required shoves passes). Evidence: `evidence/a2-reversed-facing-unaccepted.json`. Mirrored facing idles upright 600 s; the issue is dynamic balance and support placement, NOT static standing. Preserve this failing gate separately from the 4/4 PASS for canonical facing. Full A2 remains unaccepted.
+
+### 2026-10-20 experimental mirrored high-gain reflex (NOT an A2 fix)
+`node tests/a2-mirrored-reflex-experiment.mjs`: observed four of four mirrored shoves standing with landed feet after preactivation, BUT 60-second no-input standing FAILS (torso displacement -4.182m, unrequested recovery attempt). Entire combined gate fails. The current mirrored controller must preserve BOTH stability and contact-confirmed stepping. See `evidence/a2-mirrored-reflex-unaccepted.json`.

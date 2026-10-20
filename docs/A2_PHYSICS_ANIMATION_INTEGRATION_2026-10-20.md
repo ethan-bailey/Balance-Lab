@@ -78,3 +78,12 @@ The strict runner now accepts `--facing=-1` without relaxing any touchdown or to
 - +10 N·s: FAIL (eventual fall)
 
 Evidence: `evidence/a2-reversed-facing-unaccepted.json`. Motor phase and stance-gain sweeps for the harder mirrored +10 case have not yet produced a 5-second upright result, although some recoveries initially contact the ground. This is **still an open controller/stance geometry defect**, not a user-only blocker. The **canonical-facing T06 is passed; complete A2 facing sweep is NOT accepted**. No changes were deployed.
+
+### Mirrored-facing ankle/hip preactivation experiment: 4/4 shove catch but idle FAIL
+The opt-in `createBalanceReflex({ankleGain:9.5,hipGain:-3})`, enabled **one second before a shove**, produces four of four medium-shove landing/standing results in the fully mirrored rig (see `evidence/a2-mirrored-reflex-unaccepted.json`). This is a diagnostic, **NOT a usable or accepted controller**:
+- At 60s without user input, the same continuously enabled reflex displaces the torso **-4.182 m**, enters an airborne state and initiates an uncommanded step. The mandatory no-creep requirement FAILS.
+- Turning off the gains after one second of preparatory activation causes later idle stance to fail and fall. Enabling the gains **only at impact** avoids idle preloading but causes the +8/+10 N·s mirrored cases to miss the physically verified replant, although the torso may remain upright.
+- An additional 200-candidate stance-motor search and 360-candidate impact-triggered manual swing search did not produce a solution that both avoids preloading and lands upright at the hardest reversed-facing +10 N·s case.
+- Concrete next engineering task: develop a zero-drift **transient, sensor-triggered, smoothly ramped** ankle/hip feedback law which preserves both physical step placement and a stable, motor-controlled 600-second idle. Test independent foot-contact and 3s post-touchdown stability **without** preactivation. Do not merely relax the T01 criterion, fake support, or leave motors energized through idle.
+
+Reproduce the failed combined experimental gate with `node tests/a2-mirrored-reflex-experiment.mjs`; its expected exit status is nonzero. Canonical-facing T06 remains passed, and full bilateral-facings A2 remains open.
