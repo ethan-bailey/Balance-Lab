@@ -6,11 +6,12 @@ import {RIG} from '../rig-config.mjs';
 import {createRigWorld,FIXED_DT} from './planck.mjs';
 import {attachFootImpactSensor} from '../src/physics/contact-impulses.mjs';
 import {estimateSupport} from '../src/physics/support-estimator.mjs';
+import {createFootContactObserver} from '../src/physics/foot-contact-observer.mjs';
 import {createBalanceState} from '../src/behavior/balance-state.mjs';
 import {createCharacterIntent,DEFAULT_INTENT,observeSideProfile,motorResidualTargets} from '../src/ml/side-profile-policy.mjs';
 export function createActiveRigWorld(base=RIG){
  const config={...base,motor:{...base.motor}},rig=createRigWorld(config);
- const sensor=attachFootImpactSensor(rig.world,rig.ground,rig.parts),state=createBalanceState();
+ const sensor=attachFootImpactSensor(rig.world,rig.ground,rig.parts),state=createBalanceState(),footContacts=createFootContactObserver();
  let grabbed=false,priorFeet=new Set(),priorVy={footL:0,footR:0},mode={mode:'airborne',age:0,canActuate:false};
  let poseClip=null,poseTime=0,poseLoop=false,poseFrame=null,poseVelocityFrame=null,usePoseVelocity=false,loopBlendSeconds=0,stepFrame=null,stepController=null,balanceReflex=null,fadeOrigin=null,fadeVelocityOrigin=null,fadeAge=0,fadeSeconds=0,recoverySeconds=0,impacts=sensor.snapshot(),support=estimateSupport(rig.world,rig.ground,rig.parts);
  const torque={standing:8,catching:24,stepping:20,airborne:18,tumbling:8,fallen:8,grabbed:10};
@@ -85,6 +86,7 @@ export function createActiveRigWorld(base=RIG){
   if(!Number.isInteger(count)||count<0||count>100000)throw Error('Invalid step count');
   for(let i=0;i<count;i++){
    support=estimateSupport(rig.world,rig.ground,rig.parts);
+   footContacts.update(support);
    const feet=new Set(support.feet);let impactSpeed=0;
    for(const id of feet)if(!priorFeet.has(id)){
     impactSpeed=Math.max(impactSpeed,Math.max(0,-priorVy[id]));diagnostics.landingEvents++;
@@ -153,5 +155,5 @@ export function createActiveRigWorld(base=RIG){
  return {rig,step,snapshot,grab,release,moveGrab:rig.moveGrab,
   impulse:rig.impulse,parts:rig.parts,metrics:rig.metrics,
   getState,getDiagnostics,setPoseClip,enableRecoverySteps,enableBalanceReflex,getStepDiagnostics(){return stepController?.diagnostics()??null;},getSupport(){return support;},
-  getImpacts(){return impacts;},setLearnedMotorPolicy,setCharacterIntent,getLearnedDiagnostics,dispose(){sensor.detach();}};
+  getImpacts(){return impacts;},getFootContactDiagnostics(){return footContacts.snapshot();},setLearnedMotorPolicy,setCharacterIntent,getLearnedDiagnostics,dispose(){sensor.detach();}};
 }

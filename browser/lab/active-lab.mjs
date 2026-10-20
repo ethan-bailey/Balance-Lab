@@ -5,6 +5,7 @@
 import {createActiveRigWorld} from '/adapters/active-planck-v6.mjs';
 import {createSideProfileGesture,GESTURES} from '/src/animation/side-profile-gesture.mjs';
 import {createFacingRig} from '/src/config/facing-rig.mjs';
+import {createSagittalRig} from '/src/config/sagittal-rig.mjs';
 import {createRigGripBinding} from '/src/input/rig-grip-binding.mjs';
 import {attachCanvasPointerInput} from '/src/input/canvas-pointer.mjs';
 import {drawSideViewSegment,drawSideViewHead,sideViewDrawingOrder,validateSideViewRig} from './side-view-character.mjs';
@@ -16,7 +17,7 @@ const facing=new URLSearchParams(location.search).get('facing')==='-1'?-1:1;
 const manualQA=new URLSearchParams(location.search).get('rigqa')==='1';
 let width=1,height=1,dpr=1,scale=1,active=null,detach=null,tracker=null,prev={},curr={};
 let last=null,acc=0,catchupCaps=0,physicsCalls=0,drawCalls=0,rafId=0,acceptedTouches=0;
-let gesture='rest',balanceAssist=false,balanceProfile='strong';
+let gesture='rest',balanceAssist=false,balanceProfile='strong',physicalRig='baseline';
 const BALANCE_PROFILES=Object.freeze({
  strong:Object.freeze({ankleGain:1.8,hipGain:.6,smoothingSeconds:.01}),
  smooth:Object.freeze({ankleGain:1.8,hipGain:.6,smoothingSeconds:.01,reflexTorque:42,reflexTorqueFloor:28,deadband:.005}),
@@ -36,7 +37,7 @@ function snapshot(){return active.snapshot().bodies;}
 function reset(){
  if(detach){detach();detach=null;}
  if(active)active.dispose();
- active=createActiveRigWorld(createFacingRig(undefined,facing));
+ active=createActiveRigWorld(createFacingRig(physicalRig==='sagittal'?createSagittalRig():undefined,facing));
  active.enableRecoverySteps();
  // Experimental whole-body balance mode can be compared with the
  // verified steps-only baseline. Both use bounded physical joint motors.
@@ -76,7 +77,7 @@ function frame(now){const begin=performance.now();if(last===null)last=now;
  while(acc>=DT&&n<CAP){step(1);acc-=DT;n++;}
  if(acc>=DT){catchupCaps++;acc%=DT;}
  recent(physicsTimes,performance.now()-physicsStart);draw(clamp(acc/DT,0,1));
- if(now%600<17){const d=active.getStepDiagnostics();status.textContent=`Physical rig · ${active.getState().mode} · ${balanceAssist?'assist '+balanceProfile:'steps'} · steps ${d.completed} · ${percentile(intervals,.95).toFixed(1)} ms p95`;}
+ if(now%600<17){const d=active.getStepDiagnostics();status.textContent=`Physical rig · ${active.getState().mode} · ${balanceAssist?'assist '+balanceProfile:'steps'} · steps ${d.completed}/${d.attempts} · contacts ${active.getFootContactDiagnostics().stableFeet.length}/2 · ${percentile(intervals,.95).toFixed(1)} ms p95`;}
  recent(work,performance.now()-begin);rafId=requestAnimationFrame(frame);
 }
 function setBalanceAssist(enabled){
@@ -85,6 +86,13 @@ function setBalanceAssist(enabled){
  const button=document.querySelector('#balance');
  if(button){button.setAttribute('aria-pressed',String(balanceAssist));
   button.textContent=balanceAssist?'Balance: Assist (experimental)':'Balance: Steps only';}
+}
+function setPhysicalRig(name){
+ if(!['baseline','sagittal'].includes(name))throw Error('Unknown physical rig');
+ physicalRig=name;reset();
+ const button=document.querySelector('#physicalRig');
+ if(button){button.setAttribute('aria-pressed',String(physicalRig==='sagittal'));
+  button.textContent=physicalRig==='sagittal'?'Rig: Sagittal (experimental)':'Rig: Baseline';}
 }
 function setBalanceProfile(name){
  if(!Object.hasOwn(BALANCE_PROFILES,name))throw Error('Unknown balance profile');
@@ -104,6 +112,7 @@ function setGesture(name){
 const actions={
  balance:()=>setBalanceAssist(!balanceAssist),
  balanceProfile:()=>setBalanceProfile(balanceProfile==='strong'?'smooth':'strong'),
+ physicalRig:()=>setPhysicalRig(physicalRig==='baseline'?'sagittal':'baseline'),
  reset:()=>reset(),
  drop:()=>active.impulse('torso',{x:35,y:5}),
  push:()=>active.impulse('torso',{x:8*facing,y:0}),
@@ -115,9 +124,9 @@ reset();
 setGesture(gesture);
 info.textContent='True side-view humanoid · one visible eye, forward-facing nose and boots. Drag limbs, pose, push or drop; Planck controls every physical segment.';
 window.__balanceActivePreviewQA={
- sample:()=>({rig:active.snapshot(),steps:active.getStepDiagnostics(),mode:active.getState(),pointer:{...tracker.metrics},gesture,balanceAssist,balanceProfile,perf:perf()}),
+ sample:()=>({rig:active.snapshot(),steps:active.getStepDiagnostics(),footContacts:active.getFootContactDiagnostics(),mode:active.getState(),pointer:{...tracker.metrics},gesture,balanceAssist,balanceProfile,physicalRig,perf:perf()}),
  step:n=>{if(!manualQA)throw Error('Manual stepping only in rigqa mode');const result=step(n);draw(1);return result;},
- reset,setGesture,setBalanceAssist,setBalanceProfile,impulse:(x,y=0)=>active.impulse('torso',{x,y}),
+ reset,setGesture,setBalanceAssist,setBalanceProfile,setPhysicalRig,impulse:(x,y=0)=>active.impulse('torso',{x,y}),
  worldToClient:(x,y)=>{const p=screen(x,y),r=canvas.getBoundingClientRect();return {x:p.x+r.left,y:p.y+r.top};},
  resize:()=>{resize();draw(1);},
 };
