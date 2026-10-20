@@ -25,3 +25,11 @@
 ## Deployment policy
 
 Only create an isolated preview from the exact tested commit, with no production alias changes and no automatic redeploys. Verify the deployed route returns 200 and modules load; record deployment ID and link. This is a test link, not a release.
+
+## Verified isolated preview deployment
+
+- Commit: `66cb02d9db10392ec2a6ae15bd2cba6a8b29224b` (exact tested source).
+- Deployment: `dpl_xgv2SxYX4gSw6N4qqyYL55zS4H6Z`, **READY**, preview-only (target null; no production alias promotion).
+- Playable URL: `https://sling-lab-play-5hflcbeql-ethanbaileymarsh-8332.vercel.app/lab/active.html`.
+- HTTP 200 verified for `/lab/active.html`, `/lab/active-lab.mjs`, `/src/animation/side-profile-gesture.mjs`, `/adapters/active-planck-v6.mjs`, `/vendor/planck.mjs`, and stable `/lab/index.html`. Exactly four gesture buttons confirmed in served HTML.
+- No physical iPhone Safari testing was performed by the agent. Request visual, touch and frame-time feedback from user.

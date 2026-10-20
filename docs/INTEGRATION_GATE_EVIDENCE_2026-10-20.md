@@ -122,3 +122,5 @@ Authoritative project identity in `README.md` + `docs/PROJECT_CHARTER.md`; histo
 ## Side-profile playable animation candidate gate
 
 Added four opt-in upper-body physical reference poses on the v6 active rig with preserved grabbing, pushing and stepping. Node tests 114/114 PASS; 800/800 Planck stress PASS; strict A2 both facings PASS; active browser parity 8/8 PASS; playable mobile Chromium smoke PASS; four-pose browser test both facings PASS with zero JS errors. **3 N·s shove after multi-pose sequence recovered; 8 N·s after the same sequence fell** (open issue). No trained ML or combat and no physical Safari acceptance. See `docs/SIDE_PROFILE_PLAYABLE_GATE_2026-10-20.md`.
+
+- Isolated preview deployed from verified commit `66cb02d9db10392ec2a6ae15bd2cba6a8b29224b`, deployment `dpl_xgv2SxYX4gSw6N4qqyYL55zS4H6Z` READY; URL `https://sling-lab-play-5hflcbeql-ethanbaileymarsh-8332.vercel.app/lab/active.html`. HTTP 200 for playable HTML, animation, active physics and Planck modules. Stable production alias untouched; physical iPhone Safari acceptance PENDING.
