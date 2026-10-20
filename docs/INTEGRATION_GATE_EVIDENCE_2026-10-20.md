@@ -128,3 +128,5 @@ Added four opt-in upper-body physical reference poses on the v6 active rig with 
 ## Corrected true side-view character preview
 
 User clarified that side profile means a **side-scrolling human silhouette** comparable in presentation to Crisis Response/Happy Wheels, not front-facing art on a 2D simulation. Implemented original procedural side-view art (single eye, nose, ear, jaw, forward toes, torso side contour and mirrored limb depth) using unchanged authoritative Planck body transforms. Node **116/116 PASS**, strict A2 both facings PASS, 800-case stress PASS, browser source parity/touch/gesture/profile gates PASS with zero errors. Physical anatomical rig remains a future gate. See `docs/TRUE_SIDE_VIEW_PLAYABLE_GATE_2026-10-20.md`.
+
+- True side-view preview deployment from commit `0e5beda8092cd3b5f937184cade7fa522eb4aa38`: `dpl_GxNGbQBnUy9X9oaqVUtMxhPBpLWC` READY; `https://sling-lab-play-ioeqridfa-ethanbaileymarsh-8332.vercel.app/lab/active.html`; all required page/module paths HTTP 200. Stable production alias unchanged.

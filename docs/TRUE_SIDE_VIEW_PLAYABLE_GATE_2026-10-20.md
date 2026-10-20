@@ -18,3 +18,11 @@ User clarified that **side profile means the 2D side-scrolling gameplay presenta
 - Browser source parity, touch smoke, gesture smoke and true side-view render test all PASS, zero page errors, both facing directions.
 - Browser QA on mobile Chromium is not iPhone Safari device acceptance; 60 FPS remains unverified on the physical device.
 - No production alias changes. Isolated preview to be deployed only from the exact tested commit.
+
+## Isolated deployed preview
+
+- Commit: `0e5beda8092cd3b5f937184cade7fa522eb4aa38`.
+- Vercel deployment: `dpl_GxNGbQBnUy9X9oaqVUtMxhPBpLWC`, **READY**, target null (no production alias update).
+- Playable link: `https://sling-lab-play-ioeqridfa-ethanbaileymarsh-8332.vercel.app/lab/active.html`.
+- HTTP 200 confirmed for active HTML, controller, profile renderer, gesture module, v6 Planck adapter, Planck vendor module and stable M2 HTML. Source check confirms active controller imports the new profile renderer.
+- Physical iPhone 16 Safari device validation still pending user testing.
