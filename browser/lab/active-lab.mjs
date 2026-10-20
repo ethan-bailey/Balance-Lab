@@ -16,7 +16,7 @@ const facing=new URLSearchParams(location.search).get('facing')==='-1'?-1:1;
 const manualQA=new URLSearchParams(location.search).get('rigqa')==='1';
 let width=1,height=1,dpr=1,scale=1,active=null,detach=null,tracker=null,prev={},curr={};
 let last=null,acc=0,catchupCaps=0,physicsCalls=0,drawCalls=0,rafId=0,acceptedTouches=0;
-let gesture='rest';
+let gesture='rest',balanceAssist=false;
 const intervals=[],work=[],physicsTimes=[];
 const started=performance.now();
 const percentile=(values,p)=>{if(!values.length)return 0;const sorted=[...values].sort((a,b)=>a-b);return sorted[Math.min(sorted.length-1,Math.floor(p*(sorted.length-1)))];};
@@ -34,6 +34,9 @@ function reset(){
  if(active)active.dispose();
  active=createActiveRigWorld(createFacingRig(undefined,facing));
  active.enableRecoverySteps();
+ // Experimental whole-body balance mode can be compared with the
+ // verified steps-only baseline. Both use bounded physical joint motors.
+ if(balanceAssist)active.enableBalanceReflex({ankleGain:1.4,hipGain:.8});
  active.setPoseClip(createSideProfileGesture(gesture,{facing}),{fadeSeconds:.4});
  const gripBridge={parts:active.rig.parts,grab:(id,target,point)=>active.grab(id,target,point),
   moveGrab:p=>active.rig.moveGrab(p),release:()=>active.release(),impulse:(id,imp)=>active.impulse(id,imp)};
@@ -69,8 +72,15 @@ function frame(now){const begin=performance.now();if(last===null)last=now;
  while(acc>=DT&&n<CAP){step(1);acc-=DT;n++;}
  if(acc>=DT){catchupCaps++;acc%=DT;}
  recent(physicsTimes,performance.now()-physicsStart);draw(clamp(acc/DT,0,1));
- if(now%600<17){const d=active.getStepDiagnostics();status.textContent=`A2 Active · ${active.getState().mode} · steps ${d.completed} · ${percentile(intervals,.95).toFixed(1)} ms p95`;}
+ if(now%600<17){const d=active.getStepDiagnostics();status.textContent=`Physical rig · ${active.getState().mode} · ${balanceAssist?'assist':'steps'} · steps ${d.completed} · ${percentile(intervals,.95).toFixed(1)} ms p95`;}
  recent(work,performance.now()-begin);rafId=requestAnimationFrame(frame);
+}
+function setBalanceAssist(enabled){
+ balanceAssist=Boolean(enabled);
+ active.enableBalanceReflex(balanceAssist?{ankleGain:1.4,hipGain:.8}:null);
+ const button=document.querySelector('#balance');
+ if(button){button.setAttribute('aria-pressed',String(balanceAssist));
+  button.textContent=balanceAssist?'Balance: Assist (experimental)':'Balance: Steps only';}
 }
 function setGesture(name){
  if(!GESTURES.includes(name))throw Error('Unknown gesture');
@@ -80,6 +90,7 @@ function setGesture(name){
  });
 }
 const actions={
+ balance:()=>setBalanceAssist(!balanceAssist),
  reset:()=>reset(),
  drop:()=>active.impulse('torso',{x:35,y:5}),
  push:()=>active.impulse('torso',{x:8*facing,y:0}),
@@ -91,9 +102,9 @@ reset();
 setGesture(gesture);
 info.textContent='True side-view humanoid · one visible eye, forward-facing nose and boots. Drag limbs, pose, push or drop; Planck controls every physical segment.';
 window.__balanceActivePreviewQA={
- sample:()=>({rig:active.snapshot(),steps:active.getStepDiagnostics(),mode:active.getState(),pointer:{...tracker.metrics},gesture,perf:perf()}),
+ sample:()=>({rig:active.snapshot(),steps:active.getStepDiagnostics(),mode:active.getState(),pointer:{...tracker.metrics},gesture,balanceAssist,perf:perf()}),
  step:n=>{if(!manualQA)throw Error('Manual stepping only in rigqa mode');const result=step(n);draw(1);return result;},
- reset,setGesture,impulse:(x,y=0)=>active.impulse('torso',{x,y}),
+ reset,setGesture,setBalanceAssist,impulse:(x,y=0)=>active.impulse('torso',{x,y}),
  worldToClient:(x,y)=>{const p=screen(x,y),r=canvas.getBoundingClientRect();return {x:p.x+r.left,y:p.y+r.top};},
  resize:()=>{resize();draw(1);},
 };
