@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createActiveRigWorld} from '../adapters/active-planck-v3.mjs';
+import {createActiveRigWorld} from '../adapters/legacy/active-planck-v3.mjs';
 import {createRigGripBinding} from '../src/input/rig-grip-binding.mjs';
 test('M3 hand pull transmits force through whole body',()=>{
  const r=createActiveRigWorld();r.step(120);

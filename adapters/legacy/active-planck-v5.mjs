@@ -1,8 +1,9 @@
-import {RIG} from '../rig-config.mjs';
-import {createRigWorld,FIXED_DT} from './planck.mjs';
-import {attachFootImpactSensor} from '../src/physics/contact-impulses.mjs';
-import {estimateSupport} from '../src/physics/support-estimator.mjs';
-import {createBalanceState} from '../src/behavior/balance-state.mjs';
+/** HISTORICAL adapter: retained for regression only. Active runtime is ../active-planck-v6.mjs. */
+import {RIG} from '../../rig-config.mjs';
+import {createRigWorld,FIXED_DT} from '../planck.mjs';
+import {attachFootImpactSensor} from '../../src/physics/contact-impulses.mjs';
+import {estimateSupport} from '../../src/physics/support-estimator.mjs';
+import {createBalanceState} from '../../src/behavior/balance-state.mjs';
 export function createActiveRigWorld(base=RIG){
  const config={...base,motor:{...base.motor}},rig=createRigWorld(config);
  const sensor=attachFootImpactSensor(rig.world,rig.ground,rig.parts),state=createBalanceState();

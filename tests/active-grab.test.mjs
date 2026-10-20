@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createActiveRigWorld} from '../adapters/active-planck-v3.mjs';
+import {createActiveRigWorld} from '../adapters/legacy/active-planck-v3.mjs';
 test('T03 ankle lift flips the unpinned body',()=>{
  const r=createActiveRigWorld();r.step(120);
  const p=r.parts.get('footR').body.getPosition();

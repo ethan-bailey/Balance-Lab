@@ -1,4 +1,4 @@
-import {createActiveRigWorld} from '../adapters/active-planck-v4.mjs';
+import {createActiveRigWorld} from '../adapters/legacy/active-planck-v4.mjs';
 import {writeFileSync} from 'node:fs';
 import {performance} from 'node:perf_hooks';
 const cases=Number(process.argv[2]||800),modes=['idle','wrist','ankle','flick','drop','shove','tumble','extreme'];

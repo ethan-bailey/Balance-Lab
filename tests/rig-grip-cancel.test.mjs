@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createActiveRigWorld} from '../adapters/active-planck-v3.mjs';
+import {createActiveRigWorld} from '../adapters/legacy/active-planck-v3.mjs';
 import {createRigGripBinding} from '../src/input/rig-grip-binding.mjs';
 test('cancel never imparts flick; release does',()=>{
  const r=createActiveRigWorld();const p=r.parts.get('handL').body.getPosition();

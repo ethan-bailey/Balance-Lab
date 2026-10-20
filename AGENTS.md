@@ -1,5 +1,10 @@
 # Balance Lab — mandatory contributor instructions
-**Primary execution plan:** docs/PHYSICS_AI_ROADMAP.md. **Mandatory integration and gate bookkeeping:** docs/INTEGRATION_WORKFLOW.md. Read it before any development, verification, refactor, review, merge or deployment. It extends, and does not erase, the original MASTER_PLAN.md and preserved M0–M8 acceptance gates.
+
+**FIRST READ:** `README.md` and `docs/PROJECT_CHARTER.md`. This is **one side-profile, physics-driven, animation-and-ML-assisted gameplay character project**. Its test playground, recovered M2 visual build, active v6 Planck rig, experimental ML and future weapons/combat are subsystems of Balance Lab, **not different projects**. No agent may redirect development toward a generic ragdoll toy, a 3D game, the Crisis Response port or a stand-alone training benchmark.
+
+**Current source authority:** `adapters/active-planck-v6.mjs` and `adapters/planck.mjs`; see `docs/LEGACY_INVENTORY.md` before touching versioned adapters. Historical `docs/history/` reports are evidence, not new instructions. Do not claim weapons, combat or trained humanlike balance are already implemented.
+
+**Primary execution plan:** docs/PHYSICS_AI_ROADMAP.md. **Mandatory integration and gate bookkeeping:** docs/INTEGRATION_WORKFLOW.md. Read it before any development, verification, refactor, review, merge or deployment. The original MASTER_PLAN.md and M0–M8 records are historical acceptance inputs where applicable, **not a competing project charter**.
 
 **Sandbox timeout rule:** On a session expiration or HTTP 410, recover the named Vercel sandbox from its latest snapshot and continue the active gate without asking the user. Follow `docs/SANDBOX_RECOVERY.md`.
 

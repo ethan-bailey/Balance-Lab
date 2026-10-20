@@ -1,6 +1,8 @@
-# BALANCE LAB — Physics-Driven Animation & Reactive AI Roadmap
-Version 1.0 · 2026-10-20 · Project decision / engineering execution guide
+# BALANCE LAB — Side-Profile Physics-Driven Character & Reactive AI Roadmap
+Version 1.1 · 2026-10-20 · Side-profile character and gameplay execution guide
 Status: APPROVED DIRECTION FROM USER; technical gates remain evidence-driven.
+
+**Current project identity:** `docs/PROJECT_CHARTER.md`. This is the development plan for a **single 2D side-profile physically simulated character** with animation, balance, player control, equipment and future combat. Earlier A0–A8 experiments are reusable engineering milestones, not a separate toy or a different product. ML0–ML4 is an opt-in research track within this same character, not a new engine.
 
 ## 0. North star and scope
 Build an original, responsive 2D articulated character that *tries* to act human under physical forces: maintain balance, walk, resist touch, brace, fall, get up, and express intention through animation while conserving authentic mass, contacts, momentum and vulnerability. Euphoria is a behavioral quality reference, not a proprietary technology dependency or a claim of equivalence.
@@ -133,7 +135,7 @@ Dependencies: stable architecture A0/A1; may research in parallel but not block 
 
 ## 5. Acceptance register snapshot (not milestone sign-off)
 - Canonical pinned Planck 1.5.1 Node stress: reported 800/800 PASS; validate against current exact SHA before citing as current.
-- Active v6 600s no-creep and seeded stress: recorded in docs/M4_ACTIVE_BALANCE_EXPERIMENT_2026-10-20.md, provisional Node evidence.
+- Active v6 600s no-creep and seeded stress: recorded in docs/history/M4_ACTIVE_BALANCE_EXPERIMENT_2026-10-20.md, provisional Node evidence.
 - T06 actual corrective step: NOT PASSED.
 - Legacy passive T01 idle no-creep: FAIL.
 - Physical iPhone 16 Safari: PENDING.
@@ -149,10 +151,10 @@ The contributor-facing authoritative rule is AGENTS.md, section "Cost-efficient 
 5. Each handoff records commands, results, source SHA, sandbox state, evidence, remote persistence, and any reason a sandbox cannot yet safely be stopped.
 
 ### A2 verification checkpoint — 2026-10-20 (NOT SIGNED OFF)
-Read docs/A2_PHYSICS_ANIMATION_INTEGRATION_2026-10-20.md. A single -8 N·s leftward physical catch step passes with simultaneous animated upper-body pose; bilateral T06 and stronger disturbances FAIL. Retain tested controller behind opt-in; do not promote A2 to complete until strict bilateral acceptance succeeds.
+Read docs/history/A2_PHYSICS_ANIMATION_INTEGRATION_2026-10-20.md. A single -8 N·s leftward physical catch step passes with simultaneous animated upper-body pose; bilateral T06 and stronger disturbances FAIL. Retain tested controller behind opt-in; do not promote A2 to complete until strict bilateral acceptance succeeds.
 
 ### A2 incremental gate result — 2026-10-20 (canonical T06 passed; whole A2 still OPEN)
-Node opt-in `tests/a2-acceptance-gate.mjs` now passes **four contact-verified medium shoves in the canonical facing** after 5s each, with concurrent upper-body animation, true ground-contact liftoff/touchdown and sustained upright state. See `docs/A2_PHYSICS_ANIMATION_INTEGRATION_2026-10-20.md`. Do not sign off A2 until alternate facing orientation and full browser/Node/mobile gates pass.
+Node opt-in `tests/a2-acceptance-gate.mjs` now passes **four contact-verified medium shoves in the canonical facing** after 5s each, with concurrent upper-body animation, true ground-contact liftoff/touchdown and sustained upright state. See `docs/history/A2_PHYSICS_ANIMATION_INTEGRATION_2026-10-20.md`. Do not sign off A2 until alternate facing orientation and full browser/Node/mobile gates pass.
 
 ## Experimental ML0–ML4 — side-profile task-conditioned motor learning (opt-in)
 

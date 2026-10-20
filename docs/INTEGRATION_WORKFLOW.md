@@ -1,10 +1,10 @@
-# Balance Lab — Integration Operating System
-Effective 2026-10-20. This document is subordinate to `docs/PHYSICS_AI_ROADMAP.md` and preserves the original M0–M8 acceptance requirements.
+# Balance Lab — Integration Workflow (single side-profile character)
+Effective 2026-10-20. **Product identity:** `docs/PROJECT_CHARTER.md`. This workflow is subordinate to the charter and `docs/PHYSICS_AI_ROADMAP.md` and preserves applicable original M0–M8 acceptance requirements. Old milestone documents do not define a competing product.
 
 ## Single source of truth
 - GitHub default branch is the durable **accepted baseline**, not an automatic landing zone for unverified work.
 - Use one explicitly designated integration-candidate branch per release. Before choosing it, inspect live branch heads, uncommitted changes, and deployment source SHAs. Never infer the candidate from a sandbox.
-- `docs/PHYSICS_AI_ROADMAP.md` defines technical dependencies and acceptance. This document defines delivery workflow. Original `MASTER_PLAN.md` and M2 release records may live in the project Library; a 404 at repo root does not supersede them.
+- `docs/PHYSICS_AI_ROADMAP.md` defines technical dependencies and acceptance. This document defines delivery workflow. Original `MASTER_PLAN.md` and M2 release records may live in the project Library; their absence from the repo does not supersede verified history, and their old scope cannot override the current charter.
 - Stable M2 preview `dpl_3oueY2oD6hpYRJ2oZ94BzEuZ7L2G` and accepted M1 rollback `dpl_58fwXoovv622MdoHPRa3ykNyzFEt` remain untouched without verified release authorization.
 
 ## Gate ledger — mandatory semantics

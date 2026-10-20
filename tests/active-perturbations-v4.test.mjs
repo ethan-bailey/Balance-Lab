@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createActiveRigWorld} from '../adapters/active-planck-v4.mjs';
+import {createActiveRigWorld} from '../adapters/legacy/active-planck-v4.mjs';
 test('T07 severe shove produces physical fall',()=>{
  const r=createActiveRigWorld();r.step(120);r.impulse('torso',{x:35,y:5});r.step(300);
  const s=r.snapshot();assert.equal(s.metrics.nonfinite,0);

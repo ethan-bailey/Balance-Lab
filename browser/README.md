@@ -1,3 +1,7 @@
+# Browser release stages of the **same Balance Lab side-profile character**
+
+**Current identity:** `../docs/PROJECT_CHARTER.md`. The stable M2 lab and the opt-in active v6 preview are two **release stages** of one project, not separate applications to develop independently. New gameplay and ML integration belongs in the active Planck character, while the stable M2 view remains a rollback. Do not promote it without browser + physical iPhone Safari acceptance. Historical recovery details follow.
+
 # Authoritative recovered M2 browser application
 
 This directory contains the **exact extracted M2 release source** from Vercel deployment `dpl_3oueY2oD6hpYRJ2oZ94BzEuZ7L2G` (archive SHA-256 `a4b00c404b4b3aaabf6d219ee4dd8cbfdba862ba6a331ed7bef49bf92409d82a`). The recovered `lab/lab.mjs` remains at its original eight grab-substeps; unsuccessful twelve- and sixteen-substep experiments were reverted. This application now imports the same bounded joint-motor command implementation as `adapters/planck.mjs`, but does not yet consume the complete headless rig adapter, A1 telemetry, or A5 pointer modules.

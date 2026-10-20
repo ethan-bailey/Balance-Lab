@@ -1,8 +1,9 @@
-import {RIG} from '../rig-config.mjs';
-import {createRigWorld,FIXED_DT} from './planck.mjs';
-import {attachFootImpactSensor} from '../src/physics/contact-impulses.mjs';
-import {estimateSupport} from '../src/physics/support-estimator.mjs';
-import {createBalanceState} from '../src/behavior/balance-state.mjs';
+/** HISTORICAL adapter: retained for regression only. Active runtime is ../active-planck-v6.mjs. */
+import {RIG} from '../../rig-config.mjs';
+import {createRigWorld,FIXED_DT} from '../planck.mjs';
+import {attachFootImpactSensor} from '../../src/physics/contact-impulses.mjs';
+import {estimateSupport} from '../../src/physics/support-estimator.mjs';
+import {createBalanceState} from '../../src/behavior/balance-state.mjs';
 export function createActiveRigWorld(base=RIG){
  const config={...base,motor:{...base.motor}},rig=createRigWorld(config);
  const sensor=attachFootImpactSensor(rig.world,rig.ground,rig.parts),state=createBalanceState();
@@ -34,3 +35,12 @@ export function createActiveRigWorld(base=RIG){
  function snapshot(){return rig.snapshot();}
 
  // marker
+ function grab(id,target,point){rig.grab(id,target,point);grabbed=true;}
+ function release(){rig.release();grabbed=false;}
+ function getState(){return {mode:mode.mode,age:mode.age,canActuate:mode.canActuate};}
+ function getDiagnostics(){return {landingEvents:diagnostics.landingEvents,maxImpactSpeed:diagnostics.maxImpactSpeed,modeCounts:{...diagnostics.modeCounts}};}
+ return {rig,step,snapshot,grab,release,moveGrab:rig.moveGrab,
+  impulse:rig.impulse,parts:rig.parts,metrics:rig.metrics,
+  getState,getDiagnostics,getSupport(){return support;},
+  getImpacts(){return impacts;},dispose(){sensor.detach();}};
+}
