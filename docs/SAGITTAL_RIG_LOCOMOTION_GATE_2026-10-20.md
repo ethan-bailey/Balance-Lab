@@ -38,3 +38,11 @@ Tested 120 Hz Planck looped sinusoidal hip/knee/ankle pose clips (amplitudes 0.0
 ## Non-negotiable constraints
 
 One Balance Lab project; original authoritative Planck 1.5.1 fixed-step rig; reuse existing recovery, support sensing, gesture pose sampler, touch grip and animation motors; no new game, fake translation, foot pinning, Vercel auto-deploy, or production-alias overwrite. All failures and attempted variants must remain documented.
+
+## Verified isolated preview (jitter filter only)
+
+- Source commit `50d295df3ecbf817fc7cac9f4fed1b7fb6b325eb`.
+- Vercel preview `dpl_7jMz5UZrAZmPjztMnwzzwDHyY7Gt` READY; URL `https://sling-lab-play-792o2wboy-ethanbaileymarsh-8332.vercel.app/lab/active.html`.
+- HTTP 200 for active HTML, active browser JS, balance reflex module, active adapter and Planck vendor; deployed controller includes `smoothingSeconds:.01` and page includes Assist toggle. Stable production alias unchanged.
+- Node **123/123** PASS; strict A2 both facings PASS; stress 800/800 PASS; Chromium mobile playable smoke, gestures, side-profile, Assist A/B and source parity all PASS.
+- Walking and sagittal rig are **not** present in this preview; user device acceptance for smoothing remains pending.
