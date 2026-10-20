@@ -14,11 +14,19 @@ test('physical facing reflection preserves mass, dimensions, joint anchors and a
   assert.equal(b.w,a.w);assert.equal(b.h,a.h);
  }
  for(let i=0;i<RIG.joints.length;i++){
-  const a=RIG.joints[i],b=flipped.joints[i];
+  const a=RIG.joints[i],b=flipped.joints.find(j=>j.id===a.id);
+  assert.ok(b,`Missing reflected joint ${a.id}`);
   assert.equal(b.x,-a.x);
   assert.equal(b.lower,-a.upper);
   assert.equal(b.upper,-a.lower);
  }
+ const ordered=flipped.joints.map(j=>j.id);
+ const right=ordered.filter(id=>id.endsWith('R'));
+ const left=ordered.filter(id=>id.endsWith('L'));
+ assert.deepEqual(right,RIG.joints.filter(j=>j.id.endsWith('R')).map(j=>j.id));
+ assert.deepEqual(left,RIG.joints.filter(j=>j.id.endsWith('L')).map(j=>j.id));
+ assert.ok(ordered.indexOf(right.at(-1))<ordered.indexOf(left[0]),
+  'mirrored solver must traverse the physical left side first');
  assert.throws(()=>createFacingRig(RIG,0),/Invalid facing/);
  assert.deepEqual(createFacingRig(RIG,1).segments,RIG.segments);
 });

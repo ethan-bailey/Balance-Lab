@@ -101,3 +101,17 @@ test('planner rejects invalid sensors, thresholds and durations',()=>{
  const c=createRecoveryStepController();
  assert.throws(()=>c.update({dt:Infinity,support:sensor(0),parts}),/Invalid step sensor/);
 });
+
+
+test('two-frame risk confirmation rejects one-tick COM velocity spikes',()=>{
+ const {sample}=harness();
+ const c=createRecoveryStepController({confirmationFrames:2});
+ assert.equal(sample(c,.202).phase,'idle');
+ assert.equal(sample(c,.02).phase,'idle');
+ assert.equal(c.diagnostics().attempts,0);
+ assert.equal(sample(c,.34).phase,'idle');
+ const step=sample(c,.34);
+ assert.equal(step.phase,'swing');
+ assert.equal(c.diagnostics().attempts,1);
+ assert.throws(()=>createRecoveryStepController({confirmationFrames:0}),/Invalid step/);
+});

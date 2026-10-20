@@ -51,3 +51,11 @@ Instrument actual joint IDs and relative velocities for the two failing forearm-
 - Browser build: **PASS**. Full 800-case browser stress: **800/800 PASS**, max anchor 0.016987045319 m, max limit 0.111110962083 rad; five parity checks **PASS**, touch and resize/reload **PASS**, zero browser console/page errors.
 - An independent passive capture reflex (without physical stepping) survived 8/8 facing/impulse scenarios, but the coupled active step + reflex still does not meet A2/T06. This is a diagnostic, not release acceptance.
 - No deployment. No branch created. Device QA and active mirrored stepping remain **PENDING/FAIL**, respectively.
+
+## A2 bilateral stepping gate passed in Node (browser-active parity pending)
+
+- Production corrections: reflected joint solver traversal (`src/config/facing-rig.mjs`), symmetric outward planting hip brace (`src/behavior/recovery-step.mjs`), uniform 0.225 m/s COM trigger noise floor and opt-in confirmation window.
+- Strict original A2 T06 acceptance **4/4 facing +1 PASS** and **4/4 facing −1 PASS**. No threshold weakening or scripted contacts.
+- T01 no-input 600-second stance: **2/2 PASS**, 72,000 physical steps per orientation, zero unwanted steps. Light-catch ±3/±5 N·s: **8/8 PASS**, zero unwanted steps. T07 severe ±35 N·s: **4/4 PASS**, actual falls.
+- Full Node unit/integration suite **104/104 PASS**; canonical rig 800/800 stress PASS. Browser M2 full stress **800/800 PASS**, five parity cases PASS, touch/resize/reload PASS, zero browser errors.
+- Explicit limitation: browser M2 test is a separate engine path and does **not** yet validate A2 active controller. Full A2 and new deployment remain **BLOCKED** on active-source browser parity and physical iPhone QA. No release/deployment was made.

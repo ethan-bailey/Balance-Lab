@@ -10,18 +10,20 @@
  * of the command sequence.
  */
 export function createRecoveryStepController({
- triggerVelocity=.20,triggerMargin=.33,quickVelocity=.32,facing=1,
+ // Minimum risk velocity exceeds observed one-frame resting-contact jitter
+ // (about 0.202 m/s on the reflected rig), but remains below shove response.
+ triggerVelocity=.225,triggerMargin=.33,quickVelocity=.32,facing=1,
  prepareFrames=10,swingFrames=12,plantFrames=60,liftGraceFrames=24,
- cooldownSeconds=4.5,minimumDisplacement=.06,
+ cooldownSeconds=4.5,minimumDisplacement=.06,confirmationFrames=1,
 }={}){
  const valid=[triggerVelocity,triggerMargin,quickVelocity,cooldownSeconds,minimumDisplacement];
  if((facing!==1&&facing!==-1)||valid.some(v=>!Number.isFinite(v)||v<0)||
     quickVelocity<=triggerVelocity||minimumDisplacement<.02||minimumDisplacement>.3)
    throw Error('Invalid step configuration');
  if(![prepareFrames,swingFrames,plantFrames,liftGraceFrames].every(v=>Number.isInteger(v)&&v>=0&&v<=240)||
-    swingFrames<1||plantFrames<1)throw Error('Invalid step frame count');
+    swingFrames<1||plantFrames<1||!Number.isInteger(confirmationFrames)||confirmationFrames<1||confirmationFrames>10)throw Error('Invalid step frame count');
 
- let phase='idle',framesLeft=0,cooldownLeft=0,foot=null,direction=0,startX=0;
+ let phase='idle',framesLeft=0,cooldownLeft=0,foot=null,direction=0,startX=0,riskStreak=0;
  let swingTargets=null,plantTargets=null,lastContact=false,liftSeen=false,landed=false;
  let attempts=0,lifts=0,landings=0,completed=0,failures=0;
  const empty={phase:'idle',targets:{}};
@@ -44,9 +46,16 @@ export function createRecoveryStepController({
   if(phase==='idle'){
    const {com,margin,captureMargin}=support;
    if(cooldownLeft>0||grabbed||torsoHeight<1.12||Math.abs(torsoAngle)>.65||
-      support.contactCount!==2||!Number.isFinite(com.vx))return empty;
+      support.contactCount!==2||!Number.isFinite(com.vx)){riskStreak=0;return empty;}
    const riskMargin=Number.isFinite(captureMargin)?Math.min(margin,captureMargin):margin;
-   if(!Number.isFinite(riskMargin)||Math.abs(com.vx)<triggerVelocity||riskMargin>=triggerMargin)return empty;
+   if(!Number.isFinite(riskMargin)||Math.abs(com.vx)<triggerVelocity||riskMargin>=triggerMargin){
+    riskStreak=0;return empty;
+   }
+   // One-frame solver/contact velocity spikes are not a genuine fall risk.
+   // A short persistence check prevents idle foot lifts while retaining
+   // immediate capture after a sustained shove.
+   if(++riskStreak<confirmationFrames)return empty;
+   riskStreak=0;
    direction=Math.sign(com.vx);
    const bodyDirection=direction*facing;
    foot=bodyDirection<0?'R':'L';
@@ -59,9 +68,12 @@ export function createRecoveryStepController({
    swingTargets=bodyDirection<0
     ?{hipR:-.2*facing,kneeR:-.8*facing,ankleR:0}
     :{hipL:(quick?.5:.7)*facing,kneeL:-.35*facing,ankleL:0};
+   // Both directions retain a small outward hip brace while the swing foot
+   // is replanted. Releasing one hip to zero caused a torque discontinuity
+   // after mirrored touchdown under strong lateral impulses.
    plantTargets=bodyDirection<0
     ?{hipR:.2*facing,kneeR:0,ankleR:0}
-    :{hipL:0,kneeL:0,ankleL:0};
+    :{hipL:-.2*facing,kneeL:0,ankleL:0};
    lastContact=contacts.has('foot'+foot);
    liftSeen=false;landed=false;
    attempts++;
