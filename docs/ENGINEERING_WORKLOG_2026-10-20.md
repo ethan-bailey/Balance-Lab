@@ -66,3 +66,11 @@ Known open failure: medium shove does not produce a physical corrective step (8/
 - Added regression tests for low-torso contact, restoration of standing after recovery, nonfinite height rejection and backwards-compatible callers.
 - Focused tests: 6/6 pass. Full node suite: 33/33 pass (2026-10-20), exit 0.
 - Limits: no physical iPhone validation, art approval or preview change from this correction; earlier passive drift is unchanged and not relabeled as passing.
+
+## A1 animation-to-muscle groundwork (2026-10-20)
+- Added isolated src/animation/pose-sampler.mjs: immutable keyframes, joint-set validation, shortest-arc angular blending, deterministic clamped/looped sampling.
+- Added isolated src/actuation/pose-motor.mjs: joint-local target tracking command with bounded speed and torque, velocity damping and activation scale. It returns commands; it does not alter simulated bodies.
+- Existing Planck adapter and v6 active controller remain unchanged. These modules are NOT yet integrated into simulation, browser, or the release build.
+- Syntax check on pose sampler succeeded. Focused legacy active physics tests: 3/3 passed. New module behavioral tests and full integration acceptance remain PENDING, not passed.
+- Next: add executable sampler/motor regression tests; wire an opt-in PoseFrame target path into the canonical rig while preserving the original neutral baseline; verify physically overpowerable motor and crossfade with deterministic replay. Only then proceed to contact-confirmed corrective stepping.
+- M2 Safari and art gates remain pending. Existing deployed M2 and M1 rollback unchanged. No cloud CI or deployment used.

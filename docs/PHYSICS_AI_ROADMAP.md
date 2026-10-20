@@ -139,3 +139,11 @@ Dependencies: stable architecture A0/A1; may research in parallel but not block 
 - Physical iPhone 16 Safari: PENDING.
 - M2 original character art approval: PENDING USER.
 - A0–A8: NEW TRACK, none accepted yet.
+
+## 6. Mandatory cost and durability policy (applies across A0–A8)
+The contributor-facing authoritative rule is AGENTS.md, section "Cost-efficient remote development — REQUIRED".
+1. Keep code/history in the authorized Balance Lab GitHub repository when connected, and verify pushed SHA; local sandbox commits are not durable remote backup.
+2. Use short purposeful Vercel Sandbox runs for tests and compilation; batch execution and avoid idle RAM billing. Stop after verified durable backup and evidence. If no remote exists, report the persistence risk and avoid destroying the sole recoverable workspace.
+3. Keep production preview stable; use on-demand candidate deploys only at meaningful QA/acceptance gates.
+4. Run focused unit tests during iteration and comprehensive longevity/stress/parity/device suites at their applicable gates. Avoid exhausted GitHub Actions quota.
+5. Each handoff records commands, results, source SHA, sandbox state, evidence, remote persistence, and any reason a sandbox cannot yet safely be stopped.
