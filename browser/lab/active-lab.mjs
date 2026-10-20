@@ -36,7 +36,7 @@ function reset(){
  active.enableRecoverySteps();
  // Experimental whole-body balance mode can be compared with the
  // verified steps-only baseline. Both use bounded physical joint motors.
- if(balanceAssist)active.enableBalanceReflex({ankleGain:1.4,hipGain:.8});
+ if(balanceAssist)active.enableBalanceReflex({ankleGain:1.4,hipGain:.8,smoothingSeconds:.01});
  active.setPoseClip(createSideProfileGesture(gesture,{facing}),{fadeSeconds:.4});
  const gripBridge={parts:active.rig.parts,grab:(id,target,point)=>active.grab(id,target,point),
   moveGrab:p=>active.rig.moveGrab(p),release:()=>active.release(),impulse:(id,imp)=>active.impulse(id,imp)};
@@ -77,7 +77,7 @@ function frame(now){const begin=performance.now();if(last===null)last=now;
 }
 function setBalanceAssist(enabled){
  balanceAssist=Boolean(enabled);
- active.enableBalanceReflex(balanceAssist?{ankleGain:1.4,hipGain:.8}:null);
+ active.enableBalanceReflex(balanceAssist?{ankleGain:1.4,hipGain:.8,smoothingSeconds:.01}:null);
  const button=document.querySelector('#balance');
  if(button){button.setAttribute('aria-pressed',String(balanceAssist));
   button.textContent=balanceAssist?'Balance: Assist (experimental)':'Balance: Steps only';}

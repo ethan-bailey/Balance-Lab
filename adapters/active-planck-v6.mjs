@@ -104,7 +104,7 @@ export function createActiveRigWorld(base=RIG){
    if(balanceReflex){
     const side=stepController?.diagnostics()?.phase!=='idle'?stepController?.diagnostics()?.foot:null;
     stepFrame={...balanceReflex.update({support,torsoAngle:torso.getAngle(),
-     torsoHeight:torso.getWorldCenter().y,grabbed,swingFoot:side}),...stepFrame};
+     torsoHeight:torso.getWorldCenter().y,grabbed,swingFoot:side,dt:FIXED_DT}),...stepFrame};
    }
    if(learnedPolicy){
     const protectedTargets=stepFrame??{};

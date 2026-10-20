@@ -10,7 +10,7 @@ import {RIG} from '../rig-config.mjs';
  */
 function trial({facing,gesture,shove,reflex}){
  const w=createActiveRigWorld(createFacingRig(RIG,facing));w.enableRecoverySteps();
- if(reflex)w.enableBalanceReflex({ankleGain:1.4,hipGain:.8});
+ if(reflex)w.enableBalanceReflex({ankleGain:1.4,hipGain:.8,smoothingSeconds:.01});
  w.setPoseClip(createSideProfileGesture(gesture,{facing}),{fadeSeconds:.35});
  let fallen=0,kneePeak=0,minTorsoY=Infinity;
  for(let tick=0;tick<720;tick++){
