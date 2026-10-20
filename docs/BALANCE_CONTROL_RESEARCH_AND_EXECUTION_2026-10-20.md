@@ -39,9 +39,9 @@ The user observed that Balance Assist improved survival but still reacted at rou
 - Both profiles survived all 16 ±8 N·s single-shove cases across both facings and all four poses. An overwhelming 35 N·s shove still knocks down both in both facings. Invalid torque and deadband values fail closed.
 - Browser A/B comparison remains **opt-in**: Steps only, Assist Strong, Assist Smooth. No silent change to the stable M2 or A2 baseline.
 
-### B2 — physically meaningful unified balance (next, NOT complete)
+### B2 — physically meaningful unified balance (IN PROGRESS, NOT COMPLETE)
 
-1. Add reliable contact-state hysteresis, foot load and stance/swing ownership; measure real foot contact loss/landing and slip.
+1. Use existing foot-contact hysteresis (already implemented) and add measured foot load, stance/swing ownership and slip; `docs/SAGITTAL_RIG_B2_PROTOTYPE_EVIDENCE_2026-10-20.md` records the partial sagittal prototype and failing held-out balance tests.
 2. Replace the M1 frontal physical skeleton with an **opt-in anatomical sagittal rig**. Recompute neutral motor angles, support geometry, COM, knee/ankle limits and both facings. No cosmetic-only fix.
 3. Implement one state machine with mutually exclusive authority for stance correction, foot swing, plant/load transfer, stumble and fall; protect arm gesture/grip ownership.
 4. Implement risk-based capture-point placement using feasible foot reach, available ground contact, and physical touchdown, not just hip-angle presets. Repeated pushes must trigger further steps when physically possible.
