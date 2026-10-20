@@ -42,3 +42,12 @@ Instrument actual joint IDs and relative velocities for the two failing forearm-
 - Browser build PASS with checked `dist/lab/joint-motor.mjs` and Planck vendor module.
 - Browser full acceptance **798/800 FAIL** with shared controller and baseline motor cadence; same two forearm drag cases, so **no deployment**. The tested unsuccessful motor-substep experiments are not in the source branch.
 - Physical iPhone 16 performance and integrated A1 telemetry/A5 input remain release gates.
+
+## 2026-10-20 A2 continuation — composable balance reflex (release still blocked)
+
+- Focused production correction: zero-gain/zero-error capture reflex no longer sends inert joint targets that silently change motor ownership/torque. See `src/behavior/balance-reflex.mjs` and `tests/balance-reflex-noop.integration.test.mjs`.
+- Full Node suite: **101/101 PASS**. Rig 800-case stress: **800/800 PASS**, max anchor 0.011421842798 m, max limit 0.070176393982 rad.
+- A2 physical recovery: canonical **4/4 PASS**, mirrored **1/4 PASS**; **FAIL** for mirrored acceptance.
+- Browser build: **PASS**. Full 800-case browser stress: **800/800 PASS**, max anchor 0.016987045319 m, max limit 0.111110962083 rad; five parity checks **PASS**, touch and resize/reload **PASS**, zero browser console/page errors.
+- An independent passive capture reflex (without physical stepping) survived 8/8 facing/impulse scenarios, but the coupled active step + reflex still does not meet A2/T06. This is a diagnostic, not release acceptance.
+- No deployment. No branch created. Device QA and active mirrored stepping remain **PENDING/FAIL**, respectively.

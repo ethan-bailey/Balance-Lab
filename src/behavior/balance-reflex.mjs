@@ -13,8 +13,12 @@ export function createBalanceReflex({ankleGain=0,hipGain=0,maxAnkle=.28,maxHip=.
   const targets={};
   for(const side of ['L','R']){
    if(side===swingFoot||!support.feet.includes('foot'+side))continue;
-   targets['ankle'+side]=clamp(ankleGain*error,-maxAnkle,maxAnkle);
-   targets['hip'+side]=clamp(hipGain*error,-maxHip,maxHip);
+   const ankle=clamp(ankleGain*error,-maxAnkle,maxAnkle);
+   const hip=clamp(hipGain*error,-maxHip,maxHip);
+   // A zero-gain/no-error reflex must not claim motor ownership: even a
+   // zero-angle target changes torque activation in the active rig.
+   if(Math.abs(ankle)>1e-9)targets['ankle'+side]=ankle;
+   if(Math.abs(hip)>1e-9)targets['hip'+side]=hip;
   }
   return targets;
  }

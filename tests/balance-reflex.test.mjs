@@ -20,3 +20,20 @@ test('reject invalid balance gains',()=>{
  assert.throws(()=>createBalanceReflex({ankleGain:Infinity}),/Invalid balance gain/);
  assert.throws(()=>createBalanceReflex({maxHip:2}),/Invalid balance gain/);
 });
+
+test('zero-gain and zero-capture-error reflexes do not seize joint motor ownership',()=>{
+ const neutral=createBalanceReflex({ankleGain:0,hipGain:0});
+ assert.deepEqual(neutral.update({support,torsoAngle:0,torsoHeight:1.3}),{});
+ const center={...support,com:{...support.com,vx:0},captureX:0};
+ const active=createBalanceReflex({ankleGain:2,hipGain:4});
+ assert.deepEqual(active.update({support:center,torsoAngle:0,torsoHeight:1.3}),{});
+});
+
+test('capture reflex respects physical mirror symmetry for signed errors',()=>{
+ const active=createBalanceReflex({ankleGain:2,hipGain:4});
+ const mirrored={...support,com:{...support.com,x:-support.com.x,vx:-support.com.vx},
+  captureX:-support.captureX,support:{minX:-support.support.maxX,maxX:-support.support.minX}};
+ const left=active.update({support,torsoAngle:0,torsoHeight:1.3});
+ const right=active.update({support:mirrored,torsoAngle:0,torsoHeight:1.3});
+ for(const id of ['hipL','hipR','ankleL','ankleR'])assert.equal(right[id],-left[id]);
+});
