@@ -17,7 +17,7 @@
 - Headless Chromium, 393×793 touch viewport: browser rig QA 250 steps with hand grab/move/release, finite bodies, zero JS console/page errors: PASS.
 - Full browser 800-case deterministic drag stress, original 8 substeps: **798/800 FAIL**. Violations: seed 1923979547 case 82 forearmL, limit 0.1350353 rad; seed 2557891634 case 17 forearmR, limit 0.3177864 rad. Required <= 0.12 rad; no threshold relaxation.
 - Browser 5/5 parity scenarios (idle, wristDrag, ankleFlip, lightDrop, extremeImpulse): PASS on original eight-substep build. Touch/resize/reload: PASS, no browser errors.
-- 12-substep experiment: **798/800 FAIL**; max violation 0.143865 rad; some baseline parity changed. 16-substep experiment: **794/800 FAIL**, max violation 0.232892 rad. **Both experiments reverted.**
+- 12-substep experiment: **798/800 FAIL**; max violation 0.143865 rad; some baseline parity changed. 16-substep experiment: **794/800 FAIL**, max violation 0.232892 rad. **Both experiments reverted.** A third experiment increased the joint-limit guard from 0.55 to 0.75 rad at eight grab-substeps; it regressed to **793/800 FAIL** and altered baseline idle/drag parity. The guard experiment was also reverted.
 
 ## Release-blocking integration facts
 1. Browser `lab/lab.mjs` is a separate M2 Planck implementation and does **not** yet consume the tested `adapters/planck.mjs`, `src/physics/motor-telemetry.mjs`, or the A5 pointer lifecycle. Passing Node tests is not end-to-end integrated gameplay.
