@@ -7,6 +7,7 @@ import {createRigWorld,FIXED_DT} from './planck.mjs';
 import {attachFootImpactSensor} from '../src/physics/contact-impulses.mjs';
 import {estimateSupport} from '../src/physics/support-estimator.mjs';
 import {createBalanceState} from '../src/behavior/balance-state.mjs';
+import {createCharacterIntent,DEFAULT_INTENT,observeSideProfile,motorResidualTargets} from '../src/ml/side-profile-policy.mjs';
 export function createActiveRigWorld(base=RIG){
  const config={...base,motor:{...base.motor}},rig=createRigWorld(config);
  const sensor=attachFootImpactSensor(rig.world,rig.ground,rig.parts),state=createBalanceState();
@@ -14,6 +15,16 @@ export function createActiveRigWorld(base=RIG){
  let poseClip=null,poseTime=0,poseLoop=false,poseFrame=null,poseVelocityFrame=null,usePoseVelocity=false,loopBlendSeconds=0,stepFrame=null,stepController=null,balanceReflex=null,fadeOrigin=null,fadeVelocityOrigin=null,fadeAge=0,fadeSeconds=0,recoverySeconds=0,impacts=sensor.snapshot(),support=estimateSupport(rig.world,rig.ground,rig.parts);
  const torque={standing:8,catching:24,stepping:20,airborne:18,tumbling:8,fallen:8,grabbed:10};
  const diagnostics={modeCounts:{},landingEvents:0,maxImpactSpeed:0};
+ let learnedPolicy=null,learnedIntent=DEFAULT_INTENT,learnedTargets=null,policyTicks=0;
+ /** Opt-in policy must return 12 finite normalized joint residuals.
+  * Gameplay intent and hand ownership are independent of balance policy output.
+  */
+ function setLearnedMotorPolicy(policy=null){
+  if(policy!==null&&(!policy||typeof policy.predict!=='function'))throw Error('Invalid learned policy');
+  learnedPolicy=policy;learnedTargets=null;policyTicks=0;installMotorController();
+ }
+ function setCharacterIntent(intent={}){learnedIntent=createCharacterIntent(intent);}
+ function getLearnedDiagnostics(){return {enabled:!!learnedPolicy,policyTicks,intent:learnedIntent};}
 // continued
  /** Opt-in animation target: the solver remains the only authority for body poses.
   * A finite fade begins at the joints' *measured* angles to avoid motor-command jumps.
@@ -30,8 +41,8 @@ export function createActiveRigWorld(base=RIG){
   installMotorController();
  }
  function installMotorController(){
-  rig.setPoseController(!poseClip&&!stepController&&!balanceReflex?null:({id,angle,angularVelocity})=>{
-   const target=stepFrame?.[id]??poseFrame?.[id];
+  rig.setPoseController(!poseClip&&!stepController&&!balanceReflex&&!learnedPolicy?null:({id,angle,angularVelocity})=>{
+   const target=stepFrame?.[id]??learnedTargets?.[id]??poseFrame?.[id];
    return target===undefined?undefined:poseMotorCommand({angle,angularVelocity,targetAngle:target,targetVelocity:poseVelocityFrame?.[id]??0,
     maxTorque:id.startsWith('wrist')?config.motor.wristMaxTorque:config.motor.maxTorque,
     kp:config.motor.kp,kd:config.motor.kd,maxSpeed:config.motor.maxSpeed,
@@ -95,6 +106,16 @@ export function createActiveRigWorld(base=RIG){
     stepFrame={...balanceReflex.update({support,torsoAngle:torso.getAngle(),
      torsoHeight:torso.getWorldCenter().y,grabbed,swingFoot:side}),...stepFrame};
    }
+   if(learnedPolicy){
+    const protectedTargets=stepFrame??{};
+    const baseTargets={...poseFrame,...protectedTargets};
+    const obs=observeSideProfile({rig,support,poseTargets:baseTargets,
+     facing:base.facing??1,intent:learnedIntent});
+    const outputs=learnedPolicy.predict(obs);
+    learnedTargets=motorResidualTargets({outputs,rig,poseTargets:baseTargets,
+     protectedTargets,facing:base.facing??1,intent:learnedIntent});
+    policyTicks++;
+   }
    if(stepFrame&&Object.keys(stepFrame).some(id=>Object.hasOwn(stepFrame,id)))config.motor.maxTorque=42;
    sensor.reset();rig.step();
    if(poseClip){poseTime+=FIXED_DT;fadeAge+=FIXED_DT;}
@@ -112,5 +133,5 @@ export function createActiveRigWorld(base=RIG){
  return {rig,step,snapshot,grab,release,moveGrab:rig.moveGrab,
   impulse:rig.impulse,parts:rig.parts,metrics:rig.metrics,
   getState,getDiagnostics,setPoseClip,enableRecoverySteps,enableBalanceReflex,getStepDiagnostics(){return stepController?.diagnostics()??null;},getSupport(){return support;},
-  getImpacts(){return impacts;},dispose(){sensor.detach();}};
+  getImpacts(){return impacts;},setLearnedMotorPolicy,setCharacterIntent,getLearnedDiagnostics,dispose(){sensor.detach();}};
 }

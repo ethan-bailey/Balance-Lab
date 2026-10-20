@@ -153,3 +153,7 @@ Read docs/A2_PHYSICS_ANIMATION_INTEGRATION_2026-10-20.md. A single -8 N·s leftw
 
 ### A2 incremental gate result — 2026-10-20 (canonical T06 passed; whole A2 still OPEN)
 Node opt-in `tests/a2-acceptance-gate.mjs` now passes **four contact-verified medium shoves in the canonical facing** after 5s each, with concurrent upper-body animation, true ground-contact liftoff/touchdown and sustained upright state. See `docs/A2_PHYSICS_ANIMATION_INTEGRATION_2026-10-20.md`. Do not sign off A2 until alternate facing orientation and full browser/Node/mobile gates pass.
+
+## Experimental ML0–ML4 — side-profile task-conditioned motor learning (opt-in)
+
+**Design reference:** `docs/ML_SIDE_PROFILE_EXPERIMENT.md`. Preserve 2D side-profile character and future equipment/combat interfaces. This track is experimental and does not supersede A0–A8 or allow A2/A5/A6/A7 gate waivers. ML0 policy contract and seeded headless training prototype are separate from ML1 knee-buckling diagnostics, ML2 trained balance, ML3 animation/combat task tracking and ML4 physical Safari acceptance. No learned weights enter the stable preview without controlled baseline comparison and explicit acceptance.
