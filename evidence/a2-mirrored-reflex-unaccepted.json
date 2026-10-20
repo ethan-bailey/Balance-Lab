@@ -1,0 +1,51 @@
+{
+  "schema": "A2-mirrored-feedback-preload-prototype-v1",
+  "engine": "planck@1.5.1",
+  "gains": {
+    "ankleGain": 9.5,
+    "hipGain": -3
+  },
+  "shoves": [
+    {
+      "force": -10,
+      "pass": true,
+      "landings": 1,
+      "completed": 1,
+      "torsoY": 1.3695761671913496,
+      "state": "standing"
+    },
+    {
+      "force": -8,
+      "pass": true,
+      "landings": 1,
+      "completed": 1,
+      "torsoY": 1.3616104271156229,
+      "state": "standing"
+    },
+    {
+      "force": 8,
+      "pass": true,
+      "landings": 1,
+      "completed": 1,
+      "torsoY": 1.3626065603650654,
+      "state": "standing"
+    },
+    {
+      "force": 10,
+      "pass": true,
+      "landings": 1,
+      "completed": 1,
+      "torsoY": 1.3639181150719022,
+      "state": "standing"
+    }
+  ],
+  "allShovesPass": true,
+  "idle": {
+    "pass": false,
+    "torsoX": -4.182126567701631,
+    "torsoY": 1.3665886865182328,
+    "mode": "airborne",
+    "uncommandedSteps": 1
+  },
+  "fullGatePass": false
+}

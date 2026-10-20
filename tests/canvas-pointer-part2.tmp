@@ -1,0 +1,8 @@
+ const cancel=e=>{tracker.lost(e);};
+ const blur=()=>{tracker.cancel();};
+ const hidden=()=>{if(documentRef?.hidden)tracker.cancel();};
+ const handlers=[['pointerdown',down],['pointermove',move],['pointerup',up],
+  ['pointercancel',cancel],['lostpointercapture',cancel]];
+ for(const [type,fn] of handlers)canvas.addEventListener(type,fn,{passive:false});
+ windowRef?.addEventListener?.('blur',blur);
+ documentRef?.addEventListener?.('visibilitychange',hidden);

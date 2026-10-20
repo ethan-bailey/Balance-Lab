@@ -1,0 +1,12 @@
+ const event=(type,id)=>{const e=new Event(type,{cancelable:true});e.pointerId=id;canvas.dispatchEvent(e);return e;};
+ assert.equal(canvas.style.touchAction,'none');
+ assert.ok(event('pointerdown',4).defaultPrevented);
+ assert.ok(captures.has(4));
+ event('pointermove',4);event('pointerup',4);
+ assert.equal(captures.size,0);
+ event('pointercancel',5);win.dispatchEvent(new Event('blur'));
+ doc.hidden=true;doc.dispatchEvent(new Event('visibilitychange'));
+ assert.equal(calls.lost,1);assert.equal(calls.cancel,2);
+ detach();assert.equal(canvas.style.touchAction,'pan-y');
+ event('pointerdown',6);assert.equal(calls.down,1);
+});

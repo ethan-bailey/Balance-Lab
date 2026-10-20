@@ -1,0 +1,39 @@
+✔ T01 standing 60 seconds (952.203828ms)
+✔ T01 standing 60 seconds (892.993818ms)
+✔ T01 standing 60 seconds (901.469579ms)
+✔ T01 v4 ten-minute uncommanded standing (7703.520597ms)
+✔ T01 v6 ten-minute uncommanded standing (7549.225849ms)
+✔ T03 ankle lift flips the unpinned body (361.094025ms)
+✔ T03 ankle lift flips the unpinned body (349.666768ms)
+✔ T03 ankle lift flips the unpinned body (365.428253ms)
+✔ T07 severe shove produces physical fall (208.518617ms)
+✔ deterministic perturbation replay (232.531659ms)
+✔ T07 severe shove produces physical fall (215.125517ms)
+✔ deterministic perturbation replay (183.016655ms)
+✔ T07 severe shove produces physical fall (211.623695ms)
+✔ deterministic perturbation replay (235.889692ms)
+✔ topology (5.573071ms)
+✔ one second stable (67.964382ms)
+✔ ankle lift and release (101.393307ms)
+✔ impulse cap (7.824776ms)
+✔ reject bad inputs (0.681954ms)
+✔ deterministic replay (48.904079ms)
+✔ M3 DOM pointer capture and lifecycle cancellation (1.192492ms)
+✔ post-solve foot impulses are finite and observed (111.051776ms)
+✔ one pointer owns drag and velocity is capped (1.64222ms)
+✔ cancel never applies release flick (0.269472ms)
+✔ invalid and out of order coordinates cannot poison drag (0.231344ms)
+✔ T01 active no-creep 60s (904.064707ms)
+✔ M3 hand pull transmits force through whole body (417.261582ms)
+✔ M3 hand pull transmits force through whole body (473.603428ms)
+✔ M3 hand pull transmits force through whole body (468.422806ms)
+✔ M3 hand pull transmits force through whole body (448.075733ms)
+✔ cancel never imparts flick; release does (5.872558ms)
+ℹ tests 31
+ℹ suites 0
+ℹ pass 31
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 24797.764353

@@ -16,3 +16,15 @@ Never count a blocked, skipped, or pending test as passed. Preserve all failures
 ### 2026-10-20 M4 isolated rerun (not a release sign-off)
 
 T01 v6 active 600-second Node standing PASS: x=-0.076878 m; canonical passive/motor baseline still FAIL at -2.917857 m/60s. T05 v6 isolated light landings PASS 20/20 (0.04–0.13 m), 800/800 stress PASS. T06 physical corrective step remains PENDING/FAIL: 8–12 Ns shoves show no step, 16+ Ns fall after stepping mode. Browser integration, real iPhone 16 Safari, and M2 art approval remain PENDING. See `M4_ACTIVE_BALANCE_EXPERIMENT_2026-10-20.md`.
+
+### 2026-10-20 A2 contact-verified stepping update
+See A2_PHYSICS_ANIMATION_INTEGRATION_2026-10-20.md. One animated -8 N·s leftward shove passes contact-verified lift, replant and standing; 600-second opt-in idle passes. Bilateral medium-shove acceptance remains FAIL: stronger -10 N·s falls, rightward +8/+10 N·s use a safe no-step fallback, mirrored-knee idle fails. Explicit strict acceptance command node tests/a2-acceptance-gate.mjs exits nonzero until all four cases are genuinely satisfied. Browser integration and physical iPhone Safari/art approval remain PENDING.
+
+### 2026-10-20 T06 canonical bilateral Node closure (supersedes earlier one-direction failure)
+The new `tests/a2-acceptance-gate.mjs` independently confirms physical foot liftoff, >0.06m swing-foot displacement and renewed contact with sustained upright stance for -10/-8/+8/+10 N·s shoves in canonical facing, including concurrent animation: **4/4 PASS**. See `evidence/a2-bilateral-contact-t06-v2.json` and `docs/A2_PHYSICS_ANIMATION_INTEGRATION_2026-10-20.md`. Both-facing A2 acceptance still FAIL/PENDING; the opt-in mirrored-facing rig is standing-stable but does not yet reproduce all four recovery steps. Production browser parity and real iPhone Safari remain PENDING; previous passive canonical no-creep failure remains recorded separately.
+
+### 2026-10-20 mirrored-facing medium shove failure
+`node tests/a2-acceptance-gate.mjs --facing=-1` is a strict, reproducible FAIL (one of four required shoves passes). Evidence: `evidence/a2-reversed-facing-unaccepted.json`. Mirrored facing idles upright 600 s; the issue is dynamic balance and support placement, NOT static standing. Preserve this failing gate separately from the 4/4 PASS for canonical facing. Full A2 remains unaccepted.
+
+### 2026-10-20 experimental mirrored high-gain reflex (NOT an A2 fix)
+`node tests/a2-mirrored-reflex-experiment.mjs`: observed four of four mirrored shoves standing with landed feet after preactivation, BUT 60-second no-input standing FAILS (torso displacement -4.182m, unrequested recovery attempt). Entire combined gate fails. The current mirrored controller must preserve BOTH stability and contact-confirmed stepping. See `evidence/a2-mirrored-reflex-unaccepted.json`.
