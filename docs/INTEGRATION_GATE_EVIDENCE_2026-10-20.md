@@ -89,3 +89,12 @@ Instrument actual joint IDs and relative velocities for the two failing forearm-
 ## Playable idle fall regression (user device evidence)
 
 A user-provided untouched active preview trace showed torso y=0.265m, angle=1.493rad, 1 failed step, 0 grabs after ~10s. Reproduced exactly with the playable-only `setPoseClip` shoulder target: initial drift begins by 3s, recovery step triggers at 4s, fall follows. The earlier A2 idle harness did not install this clip. Removed the provisional shoulder clip from the playable rig, retaining finite motor balance, real gravity and stepping. No position snapping or artificial floor attachment. Added `tests/a2-playable-idle-gate.mjs` for 10s both facings: PASS, minimum torso height 1.3555m, maximum torso angle 0.02746rad, zero unnecessary step attempts. Mobile Chromium active preview smoke PASS, zero browser errors. Physical Safari retest pending.
+
+## A2 one-time candidate-only Vercel deployment (not production)
+
+- Exact deployed source SHA: **`b2aee5afb042c01b4d61239be4b299379c042bc5`** on `integration/balance-lab-20261020`.
+- Vercel project: `sling-lab-play`, project ID `prj_9BCKojEiFJHNPgvDPQtzjXTgACF2`. Candidate deployment ID **`dpl_EKbNf4CrmNxB8bu222PqkczweAmd`**, target `preview` (not production), state **READY**.
+- Candidate playable URL: **https://sling-lab-play-6h80lxnx5-ethanbaileymarsh-8332.vercel.app/lab/active.html**; physical reversed-facing option append `?facing=-1`.
+- Verified the deployed HTML, active runtime module, shared A2 QA source, and pinned Planck ESM returned HTTP 200. An independent mobile-viewport Chromium test against the actual deployed URL completed one physical shove recovery (landings=1, completed=1), remained standing, had zero nonfinite metrics and zero page errors.
+- **Stable alias preserved**: `sling-lab-play.vercel.app` still maps to the prior accepted M2 deployment **`dpl_3oueY2oD6hpYRJ2oZ94BzEuZ7L2G`**. The new candidate has only a branch-specific preview alias. No production promotion, rollback modification, or new auto-deployment Git connection was made.
+- Automated evidence preceding deployment: Node 104/104, canonical rig 800/800, bilateral A2 physical 8/8, light 8/8, severe 4/4, no-input 600s x2, active-source Node/Chromium parity 8/8, M2 browser stress 800/800, playable mobile browser smoke PASS. Physical iPhone 16 Safari and user art/feel approval remain **PENDING_DEVICE / PENDING_USER**.

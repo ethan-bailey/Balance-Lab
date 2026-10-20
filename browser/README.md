@@ -54,3 +54,13 @@ Kite canvas art, finite-force grabs, A5 pointer cancellation and physically
 simulated recovery. The existing `/lab/` M2 preview is deliberately unchanged.
 Run `node browser/tests/active-preview-smoke.mjs` against a local build served on
 port 9021. The candidate is provisional until physical iPhone Safari QA.
+
+### One-time A2 QA deployment
+
+Source-pinned preview (not the stable alias):
+https://sling-lab-play-6h80lxnx5-ethanbaileymarsh-8332.vercel.app/lab/active.html
+
+Deployment `dpl_EKbNf4CrmNxB8bu222PqkczweAmd` from commit
+`b2aee5afb042c01b4d61239be4b299379c042bc5` passed remote HTTP and
+mobile Chromium physics smoke tests. Use `?facing=-1` to exercise reversed
+facing. No production promotion; physical Safari QA is still required.
