@@ -48,3 +48,6 @@
 Planck revolute motors: https://www.npmjs.com/package/planck
 Box2D contacts: https://box2d.org/doc_version_2_4/md__e_1_2github_2box2d__24_2docs_2dynamics.html
 Post-solve callbacks record contact impulses; do not mutate physics entities inside callbacks.
+
+### 2026-10-20 continuation: M3 regression correction
+Recovered persistent sandbox from current named snapshot (which had progressed beyond the prior handoff). Preserved all untracked experimental files. `node --test tests/*.test.mjs` initially failed 1/18: `tests/rig-grip-binding.test.mjs` captured a mutable Planck Vec2 reference as the baseline hand position, so subsequent physics stepping changed the asserted baseline. Copied coordinates with `{...getPosition()}` instead. Both independent grip tests then passed, and the complete Node suite passed **18/18**. This is a test-fixture defect fix, not evidence that browser M3 is integrated. `node tests/long-idle.mjs` still reports torso x=-2.917857 m after 60 seconds: T01 no-creep remains FAILED. Real iPhone Safari, art approval and deployment integration remain deferred. No deployment or GitHub Actions usage.
