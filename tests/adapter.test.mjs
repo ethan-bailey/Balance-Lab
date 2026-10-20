@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createRigWorld,FIXED_DT} from '../adapters/planck.mjs';
+import {RIG} from '../rig-config.mjs';
+test('topology',()=>{const r=createRigWorld();assert.equal(FIXED_DT,1/120);assert.equal(r.parts.size,13);assert.equal(r.links.length,12);assert.deepEqual([...r.parts.keys()],RIG.segments.map(x=>x.id));});
+test('one second stable',()=>{const r=createRigWorld();r.step(120);const s=r.snapshot();assert.equal(s.metrics.nonfinite,0);assert.ok(s.metrics.maxAnchorErrorM<.04);assert.ok(s.metrics.maxLimitViolationRad<.3);});
+test('ankle lift and release',()=>{const r=createRigWorld();const p=r.parts.get('footR').body.getPosition();const start=p.y;r.grab('footR',{x:p.x,y:p.y+1});r.step(50);assert.ok(r.snapshot().bodies.footR.y>start+.08);r.release();r.step(50);assert.equal(r.metrics.nonfinite,0);});
+test('impulse cap',()=>{const r=createRigWorld();r.impulse('torso',{x:200,y:200});assert.equal(r.metrics.clampedImpulses,1);r.step(30);assert.equal(r.metrics.nonfinite,0);});
+test('reject bad inputs',()=>{const r=createRigWorld();assert.throws(()=>r.grab('missing',{x:0,y:0}));assert.throws(()=>r.impulse('missing',{x:1,y:1}));assert.throws(()=>r.step(-1));});
+test('deterministic replay',()=>{const a=createRigWorld(),b=createRigWorld();for(const r of [a,b]){r.impulse('torso',{x:8,y:3});r.step(200);}assert.deepEqual(a.snapshot(),b.snapshot());});

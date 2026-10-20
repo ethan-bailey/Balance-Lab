@@ -1,0 +1,233 @@
+{
+  "schema": "canonical-node-planck-rig-v1",
+  "date": "2026-10-20T09:09:03.543Z",
+  "node": "v24.21.0",
+  "engine": "planck@1.5.1",
+  "cases": 16,
+  "passed": 16,
+  "failed": 0,
+  "durationMs": 948,
+  "maxAnchor": 0.008427047494718738,
+  "maxLimit": 0.144321551559902,
+  "failures": [],
+  "byMode": [
+    {
+      "mode": "idle",
+      "pass": 2,
+      "fail": 0
+    },
+    {
+      "mode": "wrist",
+      "pass": 2,
+      "fail": 0
+    },
+    {
+      "mode": "ankle",
+      "pass": 2,
+      "fail": 0
+    },
+    {
+      "mode": "flick",
+      "pass": 2,
+      "fail": 0
+    },
+    {
+      "mode": "drop",
+      "pass": 2,
+      "fail": 0
+    },
+    {
+      "mode": "shove",
+      "pass": 2,
+      "fail": 0
+    },
+    {
+      "mode": "tumble",
+      "pass": 2,
+      "fail": 0
+    },
+    {
+      "mode": "extreme",
+      "pass": 2,
+      "fail": 0
+    }
+  ],
+  "measurements": [
+    {
+      "i": 0,
+      "mode": "idle",
+      "seed": 161934382,
+      "ok": true,
+      "anchor": 0.0001856501962286507,
+      "limit": 0,
+      "distance": 1.5383993875570012,
+      "groundedSteps": 269,
+      "grabSteps": 0
+    },
+    {
+      "i": 1,
+      "mode": "wrist",
+      "seed": 2816370151,
+      "ok": true,
+      "anchor": 0.00041100546161261124,
+      "limit": 0,
+      "distance": 1.847678800973649,
+      "groundedSteps": 239,
+      "grabSteps": 1000
+    },
+    {
+      "i": 2,
+      "mode": "ankle",
+      "seed": 1175838624,
+      "ok": true,
+      "anchor": 0.00020955675608866792,
+      "limit": 0,
+      "distance": 0.835647053601788,
+      "groundedSteps": 159,
+      "grabSteps": 1000
+    },
+    {
+      "i": 3,
+      "mode": "flick",
+      "seed": 3830274393,
+      "ok": true,
+      "anchor": 0.0028983906756862876,
+      "limit": 0.043427614962295635,
+      "distance": 1.905672977622377,
+      "groundedSteps": 130,
+      "grabSteps": 0
+    },
+    {
+      "i": 4,
+      "mode": "drop",
+      "seed": 2189742866,
+      "ok": true,
+      "anchor": 0.002111377026806911,
+      "limit": 0,
+      "distance": 1.6611573750846402,
+      "groundedSteps": 216,
+      "grabSteps": 0
+    },
+    {
+      "i": 5,
+      "mode": "shove",
+      "seed": 549211339,
+      "ok": true,
+      "anchor": 0.0008634249590988747,
+      "limit": 0,
+      "distance": 1.7392379273485716,
+      "groundedSteps": 167,
+      "grabSteps": 0
+    },
+    {
+      "i": 6,
+      "mode": "tumble",
+      "seed": 3203647108,
+      "ok": true,
+      "anchor": 0.0019261542403927957,
+      "limit": 0,
+      "distance": 1.8117585629712245,
+      "groundedSteps": 109,
+      "grabSteps": 0
+    },
+    {
+      "i": 7,
+      "mode": "extreme",
+      "seed": 1563115581,
+      "ok": true,
+      "anchor": 0.0016713135547552851,
+      "limit": 0.144321551559902,
+      "distance": 1.8303142670806274,
+      "groundedSteps": 108,
+      "grabSteps": 0
+    },
+    {
+      "i": 8,
+      "mode": "idle",
+      "seed": 4217551350,
+      "ok": true,
+      "anchor": 0.0001856501962286507,
+      "limit": 0,
+      "distance": 1.5383993875570012,
+      "groundedSteps": 269,
+      "grabSteps": 0
+    },
+    {
+      "i": 9,
+      "mode": "wrist",
+      "seed": 2577019823,
+      "ok": true,
+      "anchor": 0.00041100546161261124,
+      "limit": 0,
+      "distance": 1.847678800973649,
+      "groundedSteps": 239,
+      "grabSteps": 1000
+    },
+    {
+      "i": 10,
+      "mode": "ankle",
+      "seed": 936488296,
+      "ok": true,
+      "anchor": 0.00020955675608866792,
+      "limit": 0,
+      "distance": 0.835647053601788,
+      "groundedSteps": 159,
+      "grabSteps": 1000
+    },
+    {
+      "i": 11,
+      "mode": "flick",
+      "seed": 3590924065,
+      "ok": true,
+      "anchor": 0.0027846516881801227,
+      "limit": 0.07703080578831045,
+      "distance": 2.00352937170811,
+      "groundedSteps": 150,
+      "grabSteps": 0
+    },
+    {
+      "i": 12,
+      "mode": "drop",
+      "seed": 1950392538,
+      "ok": true,
+      "anchor": 0.002111377026806911,
+      "limit": 0,
+      "distance": 1.6611573750846402,
+      "groundedSteps": 216,
+      "grabSteps": 0
+    },
+    {
+      "i": 13,
+      "mode": "shove",
+      "seed": 309861011,
+      "ok": true,
+      "anchor": 0.0007040663193560903,
+      "limit": 0,
+      "distance": 1.7065414915630477,
+      "groundedSteps": 175,
+      "grabSteps": 0
+    },
+    {
+      "i": 14,
+      "mode": "tumble",
+      "seed": 2964296780,
+      "ok": true,
+      "anchor": 0.0019261542403927957,
+      "limit": 0,
+      "distance": 1.8117585629712245,
+      "groundedSteps": 109,
+      "grabSteps": 0
+    },
+    {
+      "i": 15,
+      "mode": "extreme",
+      "seed": 1323765253,
+      "ok": true,
+      "anchor": 0.008427047494718738,
+      "limit": 0.11472968276161052,
+      "distance": 1.3769179585060844,
+      "groundedSteps": 168,
+      "grabSteps": 0
+    }
+  ]
+}
