@@ -35,3 +35,11 @@ With existing `src/animation/side-profile-gesture.mjs`, measured physical hand p
 - Strict A2 both facings PASS; Planck stress 800/800 PASS; identity check PASS; browser build PASS.
 - Mobile Chromium browser: active source parity PASS; untouched idle, touch grab/release/cancel, shove, mirrored recovery PASS with steps-only default; pose sequence PASS; side-view render PASS; new Assist toggle and A/B physical response PASS. Zero page errors.
 - Preserve stable M2 production alias. Isolated preview deployment only from exact tested commit, with deployment evidence appended after READY/HTTP checks.
+
+## Verified isolated preview
+
+- Exact tested source commit: `320e217ceaa03ef635ca13212d20e722bd4ef1bc`.
+- Deployment: `dpl_48Ruy36eKsXgjMd1cG8SHNj4CPf5`, **READY**, preview target null; production alias unchanged.
+- Playable: `https://sling-lab-play-fn26kfzq3-ethanbaileymarsh-8332.vercel.app/lab/active.html`.
+- HTTP 200 for active HTML, controller, profile art, gesture module, active Planck adapter and pinned Planck vendor module; served HTML includes Assist toggle and controller includes its handler.
+- Physical Safari acceptance pending user observation.

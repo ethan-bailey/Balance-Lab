@@ -134,3 +134,5 @@ User clarified that side profile means a **side-scrolling human silhouette** com
 ## User-reported Reach/Guard and balance feedback
 
 Measured Reach/Guard hand coordinates and corrected animation reference targets. Reach now places a real hand ~0.88 m forward, Guard both hands in front of torso, both facings. Added opt-in experimental ankle/hip Balance Assist toggle; baseline 10/16 falls vs Assist 1/16 across deterministic ±8 N·s, six-second trials, with strong 25 N·s shove still causing a fall. **Assist remains OFF by default** because enabling it globally regressed existing mirrored/sequence browser acceptance. Node 121/121 PASS; 800/800 stress PASS; both strict A2 PASS; Chromium active parity, playable smoke, gestures, side-view, assist A/B all PASS. Physical Safari acceptance pending. See `docs/GESTURE_AND_BALANCE_FEEDBACK_GATE_2026-10-20.md`.
+
+- Gesture/balance A/B preview deployed from `320e217ceaa03ef635ca13212d20e722bd4ef1bc`: `dpl_48Ruy36eKsXgjMd1cG8SHNj4CPf5` READY; `https://sling-lab-play-fn26kfzq3-ethanbaileymarsh-8332.vercel.app/lab/active.html`. HTTP 200 for page and all required modules; production alias unchanged.
