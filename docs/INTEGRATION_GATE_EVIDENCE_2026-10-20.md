@@ -27,3 +27,11 @@
 
 ## Next executable gate
 Instrument actual joint IDs and relative velocities for the two failing forearm-drag seeds in the browser QA harness. Apply bounded contact-aware joint-limit correction through the solver, verify the 800-case suite at original mobile performance budget, then wire A5 input and A1 telemetry to the authoritative browser solver. Do not count the integration as accepted until that passes.
+
+## Follow-up: shared motor controller and branch consolidation
+- Unified the bounded motor command calculation in `src/physics/joint-motor.mjs`, imported by both `adapters/planck.mjs` and the built browser `browser/lab/lab.mjs`. The browser build copies this exact source into `dist/lab/joint-motor.mjs`. A focused regression found that the pose override must be applied *before* limit correction; that ordering was fixed and the A2 recovery tests returned to 5/5.
+- Full Node regression after shared-controller fix: **96/96 PASS**; canonical 800-case Node stress rerun separately. Shared-controller browser test remained **798/800 FAIL**, same two forearm-drag seeds, with 5/5 baseline scenarios and touch/resize/reload passing.
+- Recalculating browser motors on *every* substep improved stress to **799/800**, but changed idle parity by **4.15 m** and therefore cannot be accepted. Increasing limit guard to 0.58 still failed **799/800**, max overshoot 0.2026 rad and idle divergence 9.86 m. Recalculating on each substep only during grabs regressed to **795/800**; restricting to forearm grabs gave **798/800**. These experimental cadence/guard changes were reverted; baseline cadence and torque caps retained.
+- Browser uses the same **joint motor controller source**, but not yet the complete headless rig adapter, A1 motor telemetry or A5 DOM pointer module. The full end-to-end integration remains incomplete. Do not call this a pass or deploy.
+- Cherry-picked the two unique `automation/20261020-mobile-fixed-step-runtime` commits into the **same** integration branch as `205cdba` and `d53bf23`; they are retained as reusable runtime modules, not yet enabled in the M2 browser.
+- See `docs/BRANCH_POLICY.md`: no additional active development branches; historical branches retained read-only pending safe cleanup.

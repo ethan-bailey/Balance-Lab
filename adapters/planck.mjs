@@ -1,3 +1,4 @@
+import {jointMotorCommand} from '../src/physics/joint-motor.mjs';
 import * as P from 'planck';
 import {RIG} from '../rig-config.mjs';
 export const FIXED_DT=1/120;
@@ -41,15 +42,10 @@ export function createRigWorld(config=RIG){
       if(grounded)metrics.groundedSteps++;
       for(const {def,joint,A,B} of links){
         const rel=joint.getJointAngle(),vel=B.getAngularVelocity()-A.getAngularVelocity();
-        let desired=clamp((-config.motor.kp*wrap(rel)-config.motor.kd*vel)*config.motor.speedGainScale,-config.motor.maxSpeed,config.motor.maxSpeed);
         const commanded=poseController?.({id:def.id,angle:rel,angularVelocity:vel});
-        if(commanded!==undefined){
-          if(!commanded||![commanded.speed,commanded.maxTorque].every(Number.isFinite)||commanded.maxTorque<0)throw Error('Invalid pose motor command');
-          desired=clamp(commanded.speed,-config.motor.maxSpeed,config.motor.maxSpeed);
-        }
-        const guard=config.motor.limitGuard,upper=rel>joint.getUpperLimit()-guard&&vel>0,lower=rel<joint.getLowerLimit()+guard&&vel<0;
-        if(upper)desired=Math.min(desired,-clamp((rel-joint.getUpperLimit()+guard)*24+vel*.8,0,3));
-        if(lower)desired=Math.max(desired,clamp((joint.getLowerLimit()+guard-rel)*24-vel*.8,0,3));
+        if(commanded!==undefined&&(!commanded||![commanded.speed,commanded.maxTorque].every(Number.isFinite)||commanded.maxTorque<0))throw Error('Invalid pose motor command');
+        const limit=jointMotorCommand({angle:rel,velocity:vel,lower:joint.getLowerLimit(),upper:joint.getUpperLimit(),kp:config.motor.kp,kd:config.motor.kd,speedGainScale:config.motor.speedGainScale,maxSpeed:config.motor.maxSpeed,limitGuard:config.motor.limitGuard,requestedSpeed:commanded?.speed});
+        const desired=limit.speed,upper=limit.limitActive,lower=false;
         joint.enableMotor(true);joint.setMotorSpeed(desired);
         const normalLimit=(def.id.startsWith('wrist')?config.motor.wristMaxTorque:config.motor.maxTorque)*(upper||lower?1:activation);
         joint.setMaxMotorTorque(commanded===undefined?normalLimit:Math.min(normalLimit,commanded.maxTorque));

@@ -1,3 +1,4 @@
+import {jointMotorCommand} from './joint-motor.mjs';
 import * as P from '/vendor/planck.mjs';
 import {RIG} from './rig-config.mjs';
 import {RIG_TOPOLOGY} from './rig-topology.mjs';
@@ -86,10 +87,8 @@ function simulate(){
  for(const {id,a,b,joint} of links){
   const A=parts[a].body,B=parts[b].body;
   const rel=joint.getJointAngle(),vel=B.getAngularVelocity()-A.getAngularVelocity();
-  let desired=clamp((-140*angleWrap(rel)-12*vel)/12,-6,6);
-  const guard=0.55,upper=rel>joint.getUpperLimit()-guard&&vel>0,lower=rel<joint.getLowerLimit()+guard&&vel<0;
-  if(upper)desired=Math.min(desired,-clamp((rel-joint.getUpperLimit()+guard)*24+vel*.8,0,6));
-  if(lower)desired=Math.max(desired,clamp((joint.getLowerLimit()+guard-rel)*24-vel*.8,0,6));
+  const limit=jointMotorCommand({angle:rel,velocity:vel,lower:joint.getLowerLimit(),upper:joint.getUpperLimit(),kp:140,kd:12,speedGainScale:1/12,maxSpeed:6,limitGuard:.55,limitCorrectionSpeed:6});
+  const desired=limit.speed,upper=limit.limitActive,lower=false;
   joint.enableMotor(true);joint.setMotorSpeed(desired);
   // Preserve 15 Nm nominal wrist ceiling; a hard joint stop alone may use
   // 45 Nm of opposing torque, below the global 60 Nm safety ceiling.
