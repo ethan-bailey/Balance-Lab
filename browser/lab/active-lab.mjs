@@ -3,6 +3,7 @@
  * Reuses approved M2 Kite art and A5 finite-grip pointer lifecycle.
  */
 import {createActiveRigWorld} from '/adapters/active-planck-v6.mjs';
+import {createSideProfileGesture,GESTURES} from '/src/animation/side-profile-gesture.mjs';
 import {createFacingRig} from '/src/config/facing-rig.mjs';
 import {createRigGripBinding} from '/src/input/rig-grip-binding.mjs';
 import {attachCanvasPointerInput} from '/src/input/canvas-pointer.mjs';
@@ -15,6 +16,7 @@ const facing=new URLSearchParams(location.search).get('facing')==='-1'?-1:1;
 const manualQA=new URLSearchParams(location.search).get('rigqa')==='1';
 let width=1,height=1,dpr=1,scale=1,active=null,detach=null,tracker=null,prev={},curr={};
 let last=null,acc=0,catchupCaps=0,physicsCalls=0,drawCalls=0,rafId=0,acceptedTouches=0;
+let gesture='rest';
 const intervals=[],work=[],physicsTimes=[];
 const started=performance.now();
 const percentile=(values,p)=>{if(!values.length)return 0;const sorted=[...values].sort((a,b)=>a-b);return sorted[Math.min(sorted.length-1,Math.floor(p*(sorted.length-1)))];};
@@ -32,6 +34,7 @@ function reset(){
  if(active)active.dispose();
  active=createActiveRigWorld(createFacingRig(undefined,facing));
  active.enableRecoverySteps();
+ active.setPoseClip(createSideProfileGesture(gesture,{facing}),{fadeSeconds:.4});
  const gripBridge={parts:active.rig.parts,grab:(id,target,point)=>active.grab(id,target,point),
   moveGrab:p=>active.rig.moveGrab(p),release:()=>active.release(),impulse:(id,imp)=>active.impulse(id,imp)};
  tracker=createRigGripBinding({rig:gripBridge,toWorld,maxSpeed:12,flickGain:0});
@@ -69,6 +72,13 @@ function frame(now){const begin=performance.now();if(last===null)last=now;
  if(now%600<17){const d=active.getStepDiagnostics();status.textContent=`A2 Active · ${active.getState().mode} · steps ${d.completed} · ${percentile(intervals,.95).toFixed(1)} ms p95`;}
  recent(work,performance.now()-begin);rafId=requestAnimationFrame(frame);
 }
+function setGesture(name){
+ if(!GESTURES.includes(name))throw Error('Unknown gesture');
+ gesture=name;active.setPoseClip(createSideProfileGesture(name,{facing}),{fadeSeconds:.32});
+ document.querySelectorAll('[data-gesture]').forEach(b=>{
+  b.setAttribute('aria-pressed',String(b.dataset.gesture===name));
+ });
+}
 const actions={
  reset:()=>reset(),
  drop:()=>active.impulse('torso',{x:35,y:5}),
@@ -76,12 +86,14 @@ const actions={
  qa:()=>navigator.clipboard?.writeText(JSON.stringify({rig:active.snapshot(),steps:active.getStepDiagnostics(),perf:perf()}))
 };
 for(const [id,action] of Object.entries(actions))document.querySelector('#'+id)?.addEventListener('click',action);
+document.querySelectorAll('[data-gesture]').forEach(b=>b.addEventListener('click',()=>setGesture(b.dataset.gesture)));
 reset();
-info.textContent='A2 active physical balance · drag any limb, release, or push. All poses come from Planck.';
+setGesture(gesture);
+info.textContent='Side-profile character · choose a pose, drag a limb, push, or drop. Animation is force-limited; Planck determines actual motion.';
 window.__balanceActivePreviewQA={
- sample:()=>({rig:active.snapshot(),steps:active.getStepDiagnostics(),mode:active.getState(),pointer:{...tracker.metrics},perf:perf()}),
+ sample:()=>({rig:active.snapshot(),steps:active.getStepDiagnostics(),mode:active.getState(),pointer:{...tracker.metrics},gesture,perf:perf()}),
  step:n=>{if(!manualQA)throw Error('Manual stepping only in rigqa mode');const result=step(n);draw(1);return result;},
- reset,impulse:(x,y=0)=>active.impulse('torso',{x,y}),
+ reset,setGesture,impulse:(x,y=0)=>active.impulse('torso',{x,y}),
  worldToClient:(x,y)=>{const p=screen(x,y),r=canvas.getBoundingClientRect();return {x:p.x+r.left,y:p.y+r.top};},
  resize:()=>{resize();draw(1);},
 };

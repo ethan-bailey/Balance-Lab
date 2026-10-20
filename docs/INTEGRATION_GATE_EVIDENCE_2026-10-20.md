@@ -118,3 +118,7 @@ A user-provided untouched active preview trace showed torso y=0.265m, angle=1.49
 ## Side-profile project consolidation (same project, not new game)
 
 Authoritative project identity in `README.md` + `docs/PROJECT_CHARTER.md`; historical adapter versions moved under `adapters/legacy/` and nine prior reports under `docs/history/`, preserving imports and regression evidence. `AGENTS.md`, roadmap and integration workflow now explicitly distinguish one current v6 Planck character from older release stages and experiments. Post-move Node tests **112/112 PASS**, canonical/mirrored strict A2 PASS, 800-case physics stress PASS, browser build PASS, active A2 browser parity 8/8 PASS and playable mobile Chromium smoke PASS. See `docs/PROJECT_CONSOLIDATION_2026-10-20.md`. No deployment or stable-preview changes.
+
+## Side-profile playable animation candidate gate
+
+Added four opt-in upper-body physical reference poses on the v6 active rig with preserved grabbing, pushing and stepping. Node tests 114/114 PASS; 800/800 Planck stress PASS; strict A2 both facings PASS; active browser parity 8/8 PASS; playable mobile Chromium smoke PASS; four-pose browser test both facings PASS with zero JS errors. **3 N·s shove after multi-pose sequence recovered; 8 N·s after the same sequence fell** (open issue). No trained ML or combat and no physical Safari acceptance. See `docs/SIDE_PROFILE_PLAYABLE_GATE_2026-10-20.md`.
