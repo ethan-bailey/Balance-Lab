@@ -8,7 +8,8 @@ try{
  page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
  await page.goto('http://127.0.0.1:9021/lab/active.html?rigqa=1');
  await page.waitForFunction(()=>!!window.__balanceActivePreviewQA);
- const initial=await page.evaluate(()=>{const q=window.__balanceActivePreviewQA;q.step(120);
+ const idle=await page.evaluate(()=>{const q=window.__balanceActivePreviewQA;q.step(1200);return q.sample();});
+ const initial=await page.evaluate(()=>{const q=window.__balanceActivePreviewQA;q.reset();q.step(120);
   const before=q.sample();q.impulse(8);q.step(600);return {before,after:q.sample()};});
  const hand=await page.evaluate(()=>{const q=window.__balanceActivePreviewQA;
   const p=q.sample().rig.bodies.handL;return q.worldToClient(p.x,p.y);});
@@ -31,12 +32,15 @@ try{
  await page.waitForFunction(()=>!!window.__balanceActivePreviewQA);
  const mirrored=await page.evaluate(()=>{const q=window.__balanceActivePreviewQA;
   q.step(120);q.impulse(-8);q.step(600);return q.sample();});
- const pass=errors.length===0&&finite(initial.after)&&finite(reload)&&finite(mirrored)&&
+ const pass=errors.length===0&&finite(idle)&&idle.mode.mode==='standing'&&
+  idle.steps.attempts===0&&idle.rig.bodies.torso.y>1.15&&
+  finite(initial.after)&&finite(reload)&&finite(mirrored)&&
   mirrored.steps.completed>=1&&mirrored.mode.mode==='standing'&&
   initial.after.steps.completed>=1&&initial.after.rig.metrics.nonfinite===0&&
   pointerAfterRelease.starts>=1&&pointerAfterRelease.releases>=1&&
   pointerAfterCancel.cancels>=1&&resized.canvasPixels>0&&reload.perf.drawCalls>0;
  result={schema:'A2-playable-mobile-browser-smoke-v1',pass,
+  idle:{mode:idle.mode.mode,attempts:idle.steps.attempts,torsoY:idle.rig.bodies.torso.y},
   recovery:initial.after.steps,pointerAfterRelease,pointerAfterCancel,
   resized:{canvasPixels:resized.canvasPixels,dpr:resized.dpr},
   reload:{drawCalls:reload.perf.drawCalls,mode:reload.mode.mode},
