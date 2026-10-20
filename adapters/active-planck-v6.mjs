@@ -21,7 +21,7 @@ export function createActiveRigWorld(base=RIG){
    }
    const torso=rig.parts.get('torso').body;
    mode=state.update({dt:FIXED_DT,contactCount:support.contactCount,margin:support.margin,
-    torsoAngle:torso.getAngle(),angularVelocity:torso.getAngularVelocity(),impactSpeed,grabbed});
+    torsoAngle:torso.getAngle(),angularVelocity:torso.getAngularVelocity(),torsoHeight:torso.getWorldCenter().y,impactSpeed,grabbed});
    diagnostics.modeCounts[mode.mode]=(diagnostics.modeCounts[mode.mode]||0)+1;
    diagnostics.maxImpactSpeed=Math.max(diagnostics.maxImpactSpeed,impactSpeed);
    if(mode.mode==="catching")recoverySeconds=2;else recoverySeconds=Math.max(0,recoverySeconds-FIXED_DT);config.motor.maxTorque=mode.mode==="standing"&&recoverySeconds>0?18:torque[mode.mode];
