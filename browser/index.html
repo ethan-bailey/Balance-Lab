@@ -1,0 +1,202 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta name="theme-color" content="#101929"><meta name="apple-mobile-web-app-capable" content="yes"><title>Balance Lab · Tumble v3</title><style>*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;overflow:hidden;touch-action:none;overscroll-behavior:none;background:#0b1320;color:#eef4fd;font:14px system-ui,-apple-system,sans-serif}#app{height:100%;height:100dvh;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}header{background:#16243b;padding:10px 13px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #38485b;flex:none}h1{font-size:18px;margin:0;font-weight:800}header small{color:#adc1d9;font-size:10px;letter-spacing:1px}#status{font-size:11px;color:#a9eacb;font-weight:800}#view{flex:1;min-height:0;position:relative;touch-action:none}canvas{width:100%;height:100%;display:block;touch-action:none}footer{flex:none;background:#16243b;border-top:1px solid #38485b;padding:9px 11px 10px}#buttons{display:flex;gap:8px}button{flex:1;min-width:0;padding:11px 4px;min-height:44px;background:#2a3b53;border:1px solid #566b84;color:white;border-radius:10px;font-size:12px;font-weight:800;touch-action:manipulation}button.primary{background:#6dd8ec;color:#13263a;border-color:#6dd8ec}#tip{text-align:center;font-size:11px;margin-top:7px;color:#9fb6ce}#tag{position:absolute;top:10px;left:10px;font-size:10px;letter-spacing:.8px;color:#c7d6e8;pointer-events:none}</style></head><body><div id="app"><header><div><h1>◉ BALANCE LAB</h1><small>ACTIVE RAGDOLL · TUMBLE v3</small></div><div style="display:flex;align-items:center;gap:9px"><a href="/lab/" style="color:#152d3d;background:#91dfec;border-radius:8px;padding:9px 10px;font:800 11px system-ui;text-decoration:none;white-space:nowrap">M1 PHYSICS</a><span id="status">MUSCLES ON</span></div></header><div id="view"><canvas id="world"></canvas><div id="tag">DRAG A HAND, HEAD, OR TORSO</div></div><footer><div id="buttons"><button id="reset">↻ Reset</button><button id="push">Toss ↗</button><button id="getup">Get up</button><button id="muscle" class="primary">Muscles ON</button></div><div id="tip">Grab, lift, swing and fling. No feet anchored to the floor.</div></footer></div><script>
+(()=>{'use strict';
+const c=document.getElementById('world'),ctx=c.getContext('2d'),$=id=>document.getElementById(id),W=440,H=610,FLOOR=554,DT=.008,GRAV=1250;
+let sx=1,sy=1,nodes={},all=[],rods=[],hinges=[],muscles=true,grab=null,pointer={x:0,y:0},last=0,acc=0,step=0,direction=1,footGoals={L:197,R:243},stepTimer=0,grabStrength=1.0,draggingSpeed=0,hitFlash=0;
+let mode='stand', tumbleTime=0, recoverTime=0, handVX=0, handVY=0, lastPointer=null, gripStart=0, grabbedDistance=0;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),angle=(a,b)=>Math.atan2(b.y-a.y,b.x-a.x),wrap=a=>Math.atan2(Math.sin(a),Math.cos(a));
+function resize(){let r=c.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,3);c.width=Math.ceil(r.width*d);c.height=Math.ceil(r.height*d);sx=c.width/W;sy=c.height/H;ctx.setTransform(sx,0,0,sy,0,0);}window.addEventListener('resize',resize);new ResizeObserver(resize).observe(c);
+function point(id,x,y,r=6,m=1){let o={id,x,y,oldX:x,oldY:y,r,inv:1/m,ax:0,ay:0,touch:false};nodes[id]=o;all.push(o);return o;}
+function rod(a,b,stiff=1){let A=nodes[a],B=nodes[b];rods.push({a:A,b:B,len:Math.hypot(A.x-B.x,A.y-B.y),stiff});}
+function hinge(a,b,d,min,max,rest,stiff=1){hinges.push({a:nodes[a],b:nodes[b],d:nodes[d],min,max,rest,stiff});}
+function rig(){nodes={};all=[];rods=[];hinges=[];grab=null;stepTimer=0;step=0;mode='stand';tumbleTime=0;recoverTime=0;footGoals={L:193,R:247};$('status').textContent='BALANCING';
+// Adult proportions: head diameter 34, shoulder width 66, pelvis width 36,
+// shoulder to hip 107, thigh 100, shin 97, full foot-ground height ~336.
+point('pelvis',220,383,11,7);point('chest',220,289,15,8);point('neck',220,257,7,2);point('head',220,224,17,4);
+for(const s of ['L','R']){let d=s==='L'?-1:1;
+point(s+'Shoulder',220+d*32,293,7,2.1);point(s+'Elbow',220+d*49,350,7,1.5);point(s+'Wrist',220+d*55,406,6,1.1);point(s+'Hand',220+d*56,421,7,1);
+point(s+'Hip',220+d*17,385,8,2.5);point(s+'Knee',220+d*20,468,9,3.1);point(s+'Ankle',220+d*26,538,7,1.5);point(s+'Toe',220+d*37,544,7,1.2);
+}
+rod('pelvis','chest');rod('chest','neck');rod('neck','head');rod('LShoulder','RShoulder');rod('LHip','RHip');
+for(const s of ['L','R']){rod('chest',s+'Shoulder');rod('pelvis',s+'Hip');rod('chest',s+'Hip',.9);rod('pelvis',s+'Shoulder',.75);rod(s+'Shoulder',s+'Elbow');rod(s+'Elbow',s+'Wrist');rod(s+'Wrist',s+'Hand');rod(s+'Hip',s+'Knee');rod(s+'Knee',s+'Ankle');rod(s+'Ankle',s+'Toe');
+// Hinge angles are signed relative segment directions. Tolerances are
+// intentionally soft; this is a planar prototype, not clinical anatomy.
+let sign=s==='L'?-1:1;
+hinge(s+'Shoulder',s+'Elbow',s+'Wrist',-.12,2.55,0.10*sign,.92);
+hinge(s+'Hip',s+'Knee',s+'Ankle',-1.75,-.02,-.12,.95);
+}
+// A short back prevents the head and torso from behaving like a chain of marbles.
+rod('pelvis','neck',.58);
+}
+function rodSolve(r){let a=r.a,b=r.b,dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy);if(d<1e-4)return;let diff=(d-r.len)/d*r.stiff,ia=a.inv,ib=b.inv,t=ia+ib;a.x+=dx*diff*ia/t;a.y+=dy*diff*ia/t;b.x-=dx*diff*ib/t;b.y-=dy*diff*ib/t;}
+function hingeValue(h){return wrap(angle(h.b,h.d)-angle(h.a,h.b));}
+function hingeSolve(h){let a=h.a,b=h.b,d=h.d,v=hingeValue(h);let target=clamp(v,h.min,h.max),delta=wrap(target-v);if(Math.abs(delta)<1e-4)return;
+// Rotate the distal segment around its hinge, distributing the correction
+// to the other two particles to avoid a fixed infinite-mass joint.
+delta=clamp(delta*h.stiff,-.22,.22);let vx=d.x-b.x,vy=d.y-b.y,rvx=vx*Math.cos(delta)-vy*Math.sin(delta)-vx,rvy=vx*Math.sin(delta)+vy*Math.cos(delta)-vy;
+let w=d.inv/(a.inv+b.inv+d.inv),bias=1-w*.35;
+d.x+=rvx*bias;d.y+=rvy*bias;b.x-=rvx*w*.42;b.y-=rvy*w*.42;a.x-=rvx*w*.24;a.y-=rvy*w*.24;}
+function muscleTorque(h,target,k,damp,maxForce){let a=h.a,b=h.b,e=h.d,v=hingeValue(h),err=wrap(target-v),l1=Math.hypot(b.x-a.x,b.y-a.y),l2=Math.hypot(e.x-b.x,e.y-b.y);if(l1<4||l2<4)return;
+let av1=Math.atan2(b.y-b.oldY-(a.y-a.oldY),b.x-b.oldX-(a.x-a.oldX)),av2=Math.atan2(e.y-e.oldY-(b.y-b.oldY),e.x-e.oldX-(b.x-b.oldX));
+// Relative angular velocity from cross products of segment displacements.
+const da1=((b.x-a.x)*((b.y-b.oldY)-(a.y-a.oldY))-(b.y-a.y)*((b.x-b.oldX)-(a.x-a.oldX)))/(l1*l1*DT);
+const da2=((e.x-b.x)*((e.y-e.oldY)-(b.y-b.oldY))-(e.y-b.y)*((e.x-e.oldX)-(b.x-b.oldX)))/(l2*l2*DT);
+let torque=clamp(k*err-damp*(da2-da1),-maxForce,maxForce);
+let ux=-(e.y-b.y)/l2,uy=(e.x-b.x)/l2;
+let px=-(b.y-a.y)/l1,py=(b.x-a.x)/l1;
+// Paired forces approximate flexor/extensor torques without forcing pose.
+e.ax+=ux*torque*e.inv*3;e.ay+=uy*torque*e.inv*3;
+a.ax+=px*torque*a.inv*2.1;a.ay+=py*torque*a.inv*2.1;
+b.ax-=(ux*e.inv*3+px*a.inv*2.1)*torque;b.ay-=(uy*e.inv*3+py*a.inv*2.1)*torque;
+}
+function motor(id,tx,ty,k=60,d=13,limit=2700){let p=nodes[id];if(grab===p)return;let vx=(p.x-p.oldX)/DT,vy=(p.y-p.oldY)/DT;p.ax+=clamp((tx-p.x)*k-vx*d,-limit,limit);p.ay+=clamp((ty-p.y)*k-vy*d,-limit,limit);}
+function controllers(){if(!muscles||grab||mode==='tumble'||mode==='limp')return;
+const P=nodes.pelvis,C=nodes.chest,N=nodes.neck,Hd=nodes.head;let middle=(nodes.LToe.x+nodes.RToe.x)/2,com=.55*P.x+.35*C.x+.10*Hd.x;
+stepTimer=Math.max(0,stepTimer-DT);
+// A deliberately limited stepping reflex. No teleporting limbs into place.
+if(stepTimer<=0&&Math.abs(com-middle)>35&&!grab){let s=com>middle?'R':'L';footGoals[s]=clamp(com+(s==='R'?23:-23),40,400);stepTimer=.5;}
+const footMid=(footGoals.L+footGoals.R)/2;
+ const challenged=grab?0.22:1;
+// Vertical strength comes from leg extensors; pelvis motor is capped.
+// Pelvis vertical drive is allowed ONLY in the standing/recovery phase.
+// Crucially: never anchor the pelvis or feet while airborne or being dragged.
+const base=mode==='recover'?footMid:middle;
+motor('pelvis',base,FLOOR-169,mode==='recover'?135:165,mode==='recover'?21:25,mode==='recover'?10000:5300);
+motor('chest',P.x,P.y-94,grab?24:150,grab?8:25,grab?1100:6500);
+motor('neck',C.x,C.y-32,grab?18:80,grab?5:18,grab?700:2500);motor('head',N.x,N.y-33,grab?15:65,grab?5:16,grab?700:2100);
+for(const s of ['L','R']){let d=s==='L'?-1:1,hip=nodes[s+'Hip'],knee=nodes[s+'Knee'],ankle=nodes[s+'Ankle'],toe=nodes[s+'Toe'];
+let need=Math.abs(footGoals[s]-toe.x),lift=clamp((need-7)*.24,0,15);
+motor(s+'Hip',P.x+d*17,P.y,95,19,3600);
+// Toe activation is a stance reflex, not a world-space foot magnet.
+if(mode==='stand' && toe.y+toe.r>=FLOOR-7) motor(s+'Toe',footGoals[s],toe.y,200,25,6500);
+if(mode==='recover')motor(s+'Toe',footGoals[s],FLOOR-10-lift,105,18,4000);
+motor(s+'Ankle',toe.x-d*10,toe.y-6,55,14,1700);
+motor(s+'Knee',hip.x*.48+ankle.x*.52+d*7,(hip.y+ankle.y)*.5-5,mode==='recover'?160:80,18,mode==='recover'?6500:3600);
+motor(s+'Shoulder',C.x+d*32,C.y+3,grab?15:70,grab?5:17,grab?900:2900);
+motor(s+'Elbow',nodes[s+'Shoulder'].x+d*17,nodes[s+'Shoulder'].y+57,grab?8:45,grab?4:12,grab?600:1900);
+motor(s+'Wrist',nodes[s+'Elbow'].x+d*6,nodes[s+'Elbow'].y+55,grab?8:36,grab?4:12,grab?600:1600);
+// Hip and knee opposing actuator groups; passivity is from hinge limits.
+let kneeH=hinges.find(h=>h.a===hip),elbowH=hinges.find(h=>h.a===nodes[s+'Shoulder']);
+if(kneeH)muscleTorque(kneeH,-.15,grab?110:700,grab?12:30,grab?400:1100);
+if(elbowH)muscleTorque(elbowH,0,grab?12:85,grab?3:16,grab?70:230);
+}
+}
+function collide(){for(const p of all){
+ if(p.y+p.r>FLOOR){p.y=FLOOR-p.r;p.touch=true;}
+ if(p.x-p.r<8){p.x=p.r+8;p.oldX=p.x;}
+ if(p.x+p.r>W-8){p.x=W-8-p.r;p.oldX=p.x;}
+ if(p.y-p.r<25){p.y=p.r+25;p.oldY=p.y;}
+}}
+function groundImpulse(){
+ // Applied exactly once per fixed step, not repeatedly per constraint iteration.
+ for(const p of all){if(!p.touch)continue;
+  const dx=p.x-p.oldX,dy=p.y-p.oldY;
+  const friction=(mode==='stand'&&p.id.endsWith('Toe'))?.15:.80;
+  p.oldX=p.x-dx*friction;
+  if(dy>=0)p.oldY=p.y+Math.min(3.8,dy)*.13; // small physical bounce
+ }}
+function poseMetrics(){
+ const P=nodes.pelvis,C=nodes.chest,L=nodes.LToe,R=nodes.RToe;
+ const tilt=Math.atan2(C.x-P.x,P.y-C.y);
+ return{tilt,planted:L.y+L.r>=FLOOR-7||R.y+R.r>=FLOOR-7,headDown:nodes.head.y>P.y-30,
+  nearFloor:P.y>FLOOR-113};
+}
+function modes(){
+ if(!muscles){mode='limp';return;}
+ if(grab){mode='tumble';tumbleTime=0;return;}
+ const m=poseMetrics();
+ if(mode==='recover'){
+  recoverTime+=DT;
+  if(recoverTime>3&&m.planted&&Math.abs(m.tilt)<.30&&!m.nearFloor){mode='stand';tumbleTime=0;}
+  return;
+ }
+ if(mode==='stand'){
+  if(Math.abs(m.tilt)>.70||m.nearFloor||!m.planted){mode='tumble';tumbleTime=0;}
+  return;
+ }
+ tumbleTime+=DT;
+ // Never interrupt a throw: allow several seconds for free tumbling.
+ // Once the character has landed, start the independent get-up behavior.
+ if(tumbleTime>3.8&&m.nearFloor&&m.planted)startRecovery();
+}
+function startRecovery(){
+ if(grab||!muscles)return;
+ const pos=clamp(nodes.pelvis.x,95,W-95);
+ footGoals.L=pos-24;footGoals.R=pos+24;
+ mode='recover';recoverTime=0;
+}
+function simulate(){step++;
+ modes();
+ for(const p of all){p.ax=0;p.ay=GRAV;p.touch=false;}
+ controllers();
+ if(grab){
+  // Apply a strong but finite hand force; the body responds through joints.
+  // The final iterative grip constraint below also lets the user lift and spin.
+  const dx=pointer.x-grab.x,dy=pointer.y-grab.y;
+  const vx=(grab.x-grab.oldX)/DT,vy=(grab.y-grab.oldY)/DT;
+  const force=34000;
+  grab.ax+=clamp(dx*340-vx*7,-force,force);
+  grab.ay+=clamp(dy*340-vy*7,-force,force);
+ }
+ for(const p of all){
+  const vx=clamp((p.x-p.oldX)*.989,-27,27);
+  const vy=clamp((p.y-p.oldY)*.989,-27,27);
+  const x=p.x,y=p.y;
+  p.x+=vx+clamp(p.ax,-37000,37000)*DT*DT;
+  p.y+=vy+clamp(p.ay,-37000,37000)*DT*DT;
+  p.oldX=x;p.oldY=y;
+ }
+ for(let i=0;i<17;i++){
+  for(const r of rods)rodSolve(r);
+  for(const h of hinges)hingeSolve(h);
+  if(grab){
+   // Force limited compliant touch handle inside solver, so grab really follows
+   // finger while transferring displacement to the *whole* articulated body.
+   const dx=pointer.x-grab.x,dy=pointer.y-grab.y;
+   const gain=.29,maxMove=7;
+   grab.x+=clamp(dx*gain,-maxMove,maxMove);
+   grab.y+=clamp(dy*gain,-maxMove,maxMove);
+  }
+  collide();
+ }
+ groundImpulse();
+ if(step%22===0&&muscles){
+  $('status').textContent=grab?'HELD':mode==='stand'?'BALANCING':mode==='recover'?'GETTING UP':'TUMBLING';
+  $('status').style.color=mode==='stand'?'#a9eacb':mode==='recover'?'#f9c68b':'#9bdffd';
+ }
+}
+function coord(e){let r=c.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*W,y:(e.clientY-r.top)/r.height*H};}
+c.addEventListener('pointerdown',e=>{e.preventDefault();let q=coord(e),nearest=null,d=90;for(const p of all){let z=Math.hypot(p.x-q.x,p.y-q.y);if(z<d){d=z;nearest=p;}}if(nearest){grab=nearest;pointer=q;lastPointer={...q,time:performance.now()};handVX=handVY=0;mode='tumble';tumbleTime=0;hitFlash=.17;try{c.setPointerCapture(e.pointerId)}catch(_){}}},{passive:false});
+c.addEventListener('pointermove',e=>{if(grab){e.preventDefault();let q=coord(e),t=performance.now();if(lastPointer){const dt=Math.max(.008,(t-lastPointer.time)/1000);handVX=clamp((q.x-lastPointer.x)/dt,-1800,1800);handVY=clamp((q.y-lastPointer.y)/dt,-1800,1800);}pointer=q;lastPointer={...q,time:t};}},{passive:false});
+function release(){
+ if(grab){
+   // Carry finger velocity into a real toss, distributed into adjacent masses.
+   const vx=clamp(handVX*DT*.80,-12,12),vy=clamp(handVY*DT*.80,-12,12);
+   grab.oldX=grab.x-vx;grab.oldY=grab.y-vy;
+   for(const p of all){const distance=Math.hypot(p.x-grab.x,p.y-grab.y);if(p!==grab&&distance<150){const w=(1-distance/150)*.4;p.oldX-=vx*w;p.oldY-=vy*w;}}
+ }
+ grab=null;lastPointer=null;handVX=handVY=0;tumbleTime=0;
+}c.addEventListener('pointerup',release);c.addEventListener('pointercancel',release);c.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
+$('reset').onclick=rig;
+$('push').onclick=()=>{mode='tumble';tumbleTime=0;let d=direction;for(const p of all){p.oldX-=d*(p.id==='chest'||p.id==='pelvis'?14:9);p.oldY+=p.id==='head'?10:7;}direction*=-1;$('push').textContent=direction===1?'Toss ↗':'Toss ↖';};
+$('getup').onclick=startRecovery;
+$('muscle').onclick=()=>{muscles=!muscles;if(muscles&&mode==='limp')mode='tumble';$('muscle').textContent=muscles?'Muscles ON':'Muscles OFF';$('muscle').className=muscles?'primary':'';$('status').textContent=muscles?'MUSCLES ON':'RAGDOLL';$('status').style.color=muscles?'#a9eacb':'#e7a7a7';};
+function stroke(a,b,w,col,outline='#14263c'){let A=nodes[a],B=nodes[b];ctx.lineCap='round';ctx.strokeStyle=outline;ctx.lineWidth=w+3;ctx.beginPath();ctx.moveTo(A.x,A.y);ctx.lineTo(B.x,B.y);ctx.stroke();ctx.strokeStyle=col;ctx.lineWidth=w;ctx.beginPath();ctx.moveTo(A.x,A.y);ctx.lineTo(B.x,B.y);ctx.stroke();}
+function joint(id,r,col){let p=nodes[id];ctx.fillStyle=col;ctx.strokeStyle='#1a3145';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);ctx.fill();ctx.stroke();}
+function render(){ctx.setTransform(sx,0,0,sy,0,0);ctx.clearRect(0,0,W,H);let g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#111d30');g.addColorStop(1,'#23364b');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);ctx.strokeStyle='#8aafd50e';ctx.lineWidth=1;for(let x=0;x<W;x+=32){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,FLOOR);ctx.stroke();}for(let y=0;y<FLOOR;y+=32){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+ctx.fillStyle='#172636';ctx.fillRect(0,FLOOR,W,H-FLOOR);ctx.fillStyle='#618198';ctx.fillRect(0,FLOOR-1,W,3);
+ctx.fillStyle='#07131d66';ctx.beginPath();ctx.ellipse(nodes.pelvis.x,FLOOR+4,60,8,0,0,Math.PI*2);ctx.fill();
+for(const s of ['L','R']){stroke(s+'Hip',s+'Knee',20,'#4e708f');stroke(s+'Knee',s+'Ankle',16,'#6886a5');stroke(s+'Ankle',s+'Toe',13,'#293d53');joint(s+'Knee',8,'#90a8bf');joint(s+'Ankle',7,'#8ba4bd');}
+const LS=nodes.LShoulder,RS=nodes.RShoulder,LH=nodes.LHip,RH=nodes.RHip;
+ctx.beginPath();ctx.moveTo(LS.x-3,LS.y-5);ctx.lineTo(RS.x+3,RS.y-5);ctx.lineTo(RH.x+10,RH.y+7);ctx.lineTo(LH.x-10,LH.y+7);ctx.closePath();const cloth=ctx.createLinearGradient(LS.x,0,RS.x,0);cloth.addColorStop(0,'#31526f');cloth.addColorStop(.48,'#719cbb');cloth.addColorStop(1,'#31526f');ctx.fillStyle=cloth;ctx.fill();ctx.strokeStyle='#a1bed2';ctx.lineWidth=1.5;ctx.stroke();
+for(const s of ['L','R']){stroke(s+'Shoulder',s+'Elbow',14,'#6d91ad');stroke(s+'Elbow',s+'Wrist',12,'#82a1b6');stroke(s+'Wrist',s+'Hand',11,'#c3ab98');joint(s+'Elbow',7,'#99b5c5');joint(s+'Hand',7,'#d9bea7');}
+stroke('chest','neck',14,'#7897a9');const h=nodes.head;
+ctx.save();ctx.translate(h.x,h.y);ctx.fillStyle='#d2b69c';ctx.strokeStyle='#ecd8c2';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(0,0,17,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle='#314456';ctx.beginPath();ctx.arc(0,-3,17,Math.PI,2*Math.PI);ctx.lineTo(17,-5);ctx.lineTo(-17,-5);ctx.closePath();ctx.fill();ctx.fillStyle='#30455c';ctx.beginPath();ctx.arc(-5,1,1.5,0,6.3);ctx.arc(5,1,1.5,0,6.3);ctx.fill();ctx.restore();
+if(grab){ctx.strokeStyle='#82e8ff';ctx.lineWidth=2;ctx.setLineDash([4,5]);ctx.beginPath();ctx.arc(grab.x,grab.y,grab.r+11,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
+  ctx.strokeStyle='rgba(112,235,253,.55)';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(grab.x,grab.y);ctx.lineTo(pointer.x,pointer.y);ctx.stroke();
+  ctx.fillStyle='#8ceaff';ctx.beginPath();ctx.arc(pointer.x,pointer.y,6,0,Math.PI*2);ctx.fill();
+ }
+}
+function run(now){if(!last)last=now;acc+=Math.min(.04,(now-last)/1000);last=now;let n=0;while(acc>=DT&&n<7){simulate();acc-=DT;n++;}if(n>=7)acc=0;render();requestAnimationFrame(run);}resize();rig();requestAnimationFrame(run);
+})();
+</script></body></html>

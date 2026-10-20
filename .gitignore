@@ -1,1 +1,5 @@
 /node_modules
+
+# Browser build outputs
+browser/dist/
+browser/node_modules/

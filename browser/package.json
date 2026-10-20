@@ -1,0 +1,1 @@
+{"name":"balance-lab-browser","private":true,"type":"module","scripts":{"build":"node build.mjs"},"dependencies":{"planck":"1.5.1"}}
