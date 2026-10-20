@@ -85,3 +85,7 @@ Instrument actual joint IDs and relative velocities for the two failing forearm-
 - The previously accepted M2 `/lab/` path remains unchanged and is a rollback.
 - The active candidate is a provisional playable preview, not yet physically
   tested on iPhone Safari; no claim of full production acceptance.
+
+## Playable idle fall regression (user device evidence)
+
+A user-provided untouched active preview trace showed torso y=0.265m, angle=1.493rad, 1 failed step, 0 grabs after ~10s. Reproduced exactly with the playable-only `setPoseClip` shoulder target: initial drift begins by 3s, recovery step triggers at 4s, fall follows. The earlier A2 idle harness did not install this clip. Removed the provisional shoulder clip from the playable rig, retaining finite motor balance, real gravity and stepping. No position snapping or artificial floor attachment. Added `tests/a2-playable-idle-gate.mjs` for 10s both facings: PASS, minimum torso height 1.3555m, maximum torso angle 0.02746rad, zero unnecessary step attempts. Mobile Chromium active preview smoke PASS, zero browser errors. Physical Safari retest pending.

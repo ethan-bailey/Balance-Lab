@@ -4,7 +4,6 @@
  */
 import {createActiveRigWorld} from '/adapters/active-planck-v6.mjs';
 import {createFacingRig} from '/src/config/facing-rig.mjs';
-import {createPoseClip} from '/src/animation/pose-sampler.mjs';
 import {createRigGripBinding} from '/src/input/rig-grip-binding.mjs';
 import {attachCanvasPointerInput} from '/src/input/canvas-pointer.mjs';
 import {drawCharacterSegment,drawCharacterHead,drawingOrder,validateVisualRig} from './m2-visual-rig.mjs';
@@ -33,8 +32,6 @@ function reset(){
  if(active)active.dispose();
  active=createActiveRigWorld(createFacingRig(undefined,facing));
  active.enableRecoverySteps();
- active.setPoseClip(createPoseClip([{time:0,pose:{shoulderL:.2*facing,shoulderR:-.2*facing}},
-  {time:3,pose:{shoulderL:.2*facing,shoulderR:-.2*facing}}]));
  const gripBridge={parts:active.rig.parts,grab:(id,target,point)=>active.grab(id,target,point),
   moveGrab:p=>active.rig.moveGrab(p),release:()=>active.release(),impulse:(id,imp)=>active.impulse(id,imp)};
  tracker=createRigGripBinding({rig:gripBridge,toWorld,maxSpeed:12,flickGain:0});
