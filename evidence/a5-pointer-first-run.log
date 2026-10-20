@@ -1,0 +1,44 @@
+✔ A5.4: secondary pointer cannot release, move or cancel the owner (2.250376ms)
+✔ A5.4: blur releases native capture and cancels once, never flicks (0.432084ms)
+✔ A5.4: hidden tab, explicit pointercancel and detach all release capture (0.384941ms)
+✔ A5.4: invalid pointer ID and failed grab do not strand active state (0.503724ms)
+✔ A5.1: rotated segment is picked at exact local coordinates (0.25321ms)
+✔ A5.4: default release never injects synthetic impulse (0.421477ms)
+✔ A5.4: explicit capped flick opt-in; cancel applies no impulse (0.350671ms)
+✔ A5.5: real active Planck rig pointer cancellation is force-bounded (352.072001ms)
+✖ M3 DOM pointer capture and lifecycle cancellation (1.827976ms)
+✔ one pointer owns drag and velocity is capped (1.649407ms)
+✔ cancel never applies release flick (0.251325ms)
+✔ invalid and out of order coordinates cannot poison drag (0.233282ms)
+✔ M3 hand pull transmits force through whole body (378.441868ms)
+✔ M3 hand pull transmits force through whole body (379.842682ms)
+✔ cancel never imparts flick; release does (5.733436ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 14
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1463.711528
+
+✖ failing tests:
+
+test at tests/canvas-pointer.test.mjs:4:1
+✖ M3 DOM pointer capture and lifecycle cancellation (1.827976ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  0 !== 1
+
+      at TestContext.<anonymous> (file:///vercel/balance-a5-input/tests/canvas-pointer.test.mjs:23:9)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

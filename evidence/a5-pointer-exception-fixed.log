@@ -1,0 +1,18 @@
+✔ A5.4: secondary pointer cannot release, move or cancel the owner (2.267339ms)
+✔ A5.4: blur releases native capture and cancels once, never flicks (1.215784ms)
+✔ A5.4: hidden tab, explicit pointercancel and detach all release capture (0.33135ms)
+✔ A5.4: invalid pointer ID and failed grab do not strand active state (0.487918ms)
+✔ A5.1: rotated segment is picked at exact local coordinates (0.297035ms)
+✔ A5.4: default release never injects synthetic impulse (0.423869ms)
+✔ A5.4: explicit capped flick opt-in; cancel applies no impulse (0.373531ms)
+✔ A5.5: real active Planck rig pointer cancellation is force-bounded (370.17555ms)
+✔ A5.4: pointerup callback failure cannot leak browser capture (0.863576ms)
+✔ A5.4: cancellation callback failure cannot leak browser capture (0.514231ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 453.047301

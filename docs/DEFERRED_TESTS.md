@@ -28,3 +28,6 @@ The new `tests/a2-acceptance-gate.mjs` independently confirms physical foot lift
 
 ### 2026-10-20 experimental mirrored high-gain reflex (NOT an A2 fix)
 `node tests/a2-mirrored-reflex-experiment.mjs`: observed four of four mirrored shoves standing with landed feet after preactivation, BUT 60-second no-input standing FAILS (torso displacement -4.182m, unrequested recovery attempt). Entire combined gate fails. The current mirrored controller must preserve BOTH stability and contact-confirmed stepping. See `evidence/a2-mirrored-reflex-unaccepted.json`.
+
+### 2026-10-20 A5 pointer lifecycle independent rerun
+A5 isolated pointer ownership/cancellation/grab semantics: 10/10 executable tests PASS; full suite 68/68 PASS. Canonical 800/800, active-v6 800/800, light landing 20/20 and browser/Node parity 4/4 PASS. A2 default-facing isolated T06 4/4 PASS; **mirrored-facing T06 FAIL** (3/4 lose standing). **PENDING:** A5 browser integration, real iPhone 16 Safari pointer and performance QA, M2 Kite user art approval, passive T01 no-creep, full A2, A3/A4/A6–A8. See docs/A5_POINTER_LIFECYCLE_2026-10-20.md and evidence/a5-*.log. No deployment or GitHub Actions.

@@ -4,7 +4,7 @@ export function createDragTracker({toWorld,pick,onStart=()=>{},onMove=()=>{},onE
  let active=null;const metrics={starts:0,moves:0,releases:0,cancels:0,ignored:0};
  const finite=p=>p&&Number.isFinite(p.x)&&Number.isFinite(p.y);
  function sample(e){
-  if(!e||!Number.isFinite(e.clientX)||!Number.isFinite(e.clientY)||!Number.isFinite(e.timeStamp))return null;
+  if(!e||!Number.isInteger(e.pointerId)||!Number.isFinite(e.clientX)||!Number.isFinite(e.clientY)||!Number.isFinite(e.timeStamp))return null;
   const p=toWorld(e.clientX,e.clientY);
   return finite(p)?{x:p.x,y:p.y,t:e.timeStamp}:null;
  }
@@ -12,7 +12,9 @@ export function createDragTracker({toWorld,pick,onStart=()=>{},onMove=()=>{},onE
   if(active){metrics.ignored++;return false;}
   const p=sample(e);if(!p)return false;
   const id=pick(p);if(!id)return false;
-  active={pointerId:e.pointerId,id,history:[p],latest:p};metrics.starts++;onStart(id,p);return true;
+  active={pointerId:e.pointerId,id,history:[p],latest:p};
+  try{onStart(id,p);}catch(error){active=null;throw error;}
+  metrics.starts++;return true;
  }
  function move(e){
   if(!active||active.pointerId!==e.pointerId){metrics.ignored++;return false;}

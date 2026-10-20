@@ -5,7 +5,7 @@ import {createRigGripBinding} from '../src/input/rig-grip-binding.mjs';
 test('cancel never imparts flick; release does',()=>{
  const r=createActiveRigWorld();const p=r.parts.get('handL').body.getPosition();
  let flicks=0;r.impulse=()=>{flicks++;};
- const t=createRigGripBinding({rig:r,toWorld:(x,y)=>({x,y})});
+ const t=createRigGripBinding({rig:r,toWorld:(x,y)=>({x,y}),flickGain:.25});
  const e=(id,x,y,ms)=>({pointerId:id,clientX:x,clientY:y,timeStamp:ms});
  assert.ok(t.down(e(7,p.x,p.y,1)));
  assert.equal(t.down(e(8,p.x,p.y,2)),false);

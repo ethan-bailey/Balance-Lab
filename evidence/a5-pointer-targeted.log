@@ -1,0 +1,23 @@
+✔ A5.4: secondary pointer cannot release, move or cancel the owner (2.280021ms)
+✔ A5.4: blur releases native capture and cancels once, never flicks (0.428988ms)
+✔ A5.4: hidden tab, explicit pointercancel and detach all release capture (1.088483ms)
+✔ A5.4: invalid pointer ID and failed grab do not strand active state (0.479387ms)
+✔ A5.1: rotated segment is picked at exact local coordinates (0.263596ms)
+✔ A5.4: default release never injects synthetic impulse (0.413296ms)
+✔ A5.4: explicit capped flick opt-in; cancel applies no impulse (0.360123ms)
+✔ A5.5: real active Planck rig pointer cancellation is force-bounded (344.800216ms)
+✔ M3 DOM pointer capture and lifecycle cancellation (1.288086ms)
+✔ one pointer owns drag and velocity is capped (1.783705ms)
+✔ cancel never applies release flick (0.262813ms)
+✔ invalid and out of order coordinates cannot poison drag (0.231632ms)
+✔ M3 hand pull transmits force through whole body (458.040739ms)
+✔ M3 hand pull transmits force through whole body (395.939292ms)
+✔ cancel never imparts flick; release does (5.72812ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1544.05786
