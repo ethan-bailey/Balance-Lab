@@ -32,7 +32,7 @@ function profileSnapshot(){
   note:'Frame intervals include browser scheduling; work timings measure JavaScript only, not compositor/GPU. Touch-to-draw is not presentation latency.'
  };
 }
-let stability={maxJointErrorM:0,maxLimitViolationRad:0,maxMotorTorqueNm:0,clampedImpulses:0,groundedSteps:0,adaptiveThreeSubstepFrames:0,handEightSubstepFrames:0,grabEightSubstepFrames:0};
+let stability={maxJointErrorM:0,maxLimitViolationRad:0,maxMotorTorqueNm:0,clampedImpulses:0,groundedSteps:0,adaptiveThreeSubstepFrames:0,adaptiveFourSubstepFrames:0,handEightSubstepFrames:0,grabEightSubstepFrames:0};
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 const angleWrap=a=>Math.atan2(Math.sin(a),Math.cos(a));
 function resize(){
@@ -61,7 +61,7 @@ function reset(){
  prev=curr=snapshot();steps=skips=0;last=null;acc=0;frames=[];
  frameWork=[];physicsWork=[];drawWork=[];physicsCalls=rafCount=slowFrames=0;touchLatency=[];pendingTouchAt=null;acceptedTouches=0;
  minuteStartedAt=performance.now();minuteIntervals=[];minuteWork=[];minuteSummaries=[];
- stability={maxJointErrorM:0,maxLimitViolationRad:0,maxMotorTorqueNm:0,clampedImpulses:0,groundedSteps:0,adaptiveThreeSubstepFrames:0,handEightSubstepFrames:0,grabEightSubstepFrames:0};
+ stability={maxJointErrorM:0,maxLimitViolationRad:0,maxMotorTorqueNm:0,clampedImpulses:0,groundedSteps:0,adaptiveThreeSubstepFrames:0,adaptiveFourSubstepFrames:0,handEightSubstepFrames:0,grabEightSubstepFrames:0};
 }
 function snapshot(){
  const out={};
@@ -98,8 +98,8 @@ function simulate(){
  for(const {body} of Object.values(parts)){
   if(Math.abs(body.getAngularVelocity())>12||body.getLinearVelocity().length()>2.5){highMotion=true;break;}
  }
- const substeps=grab?8:highMotion?3:2;
- if(substeps===3)stability.adaptiveThreeSubstepFrames++;
+ const substeps=grab?8:highMotion?4:2;
+ if(substeps===4)stability.adaptiveFourSubstepFrames++;
  if(substeps===8){stability.grabEightSubstepFrames++;if(grab.id.startsWith('hand'))stability.handEightSubstepFrames++;}
  for(let sub=0;sub<substeps;sub++){
   if(grab){
@@ -248,7 +248,7 @@ function applyCappedImpulse(x,y){
 document.querySelector('#push').onclick=()=>applyCappedImpulse(45,18);
 document.querySelector('#qa').onclick=async()=>{
  const a=frames.slice().sort((x,y)=>x-y);
- const q={engine:'planck@1.5.1',stabilityRevision:'m2-guard55-wrist-brake45-v1',m2Revision:'m2-kite-canonical-visual-v1',characterId:CHARACTER_ID,artApproval:'provisional',support:supportSample(),selfCollision:'disabled-pending-isolated-acceptance',experimental:true,steps,physicsSubsteps:'adaptive-2-to-3-grab-8',catchupCaps:skips,gripForceCapsN:{hand:160,other:380},stability:{...stability},...profileSnapshot(),screen:[innerWidth,innerHeight],userAgent:navigator.userAgent,at:new Date().toISOString()};
+ const q={engine:'planck@1.5.1',stabilityRevision:'m2-guard55-wrist-brake45-v1',m2Revision:'m2-kite-canonical-visual-v1',characterId:CHARACTER_ID,artApproval:'provisional',support:supportSample(),selfCollision:'disabled-pending-isolated-acceptance',experimental:true,steps,physicsSubsteps:'adaptive-2-to-4-grab-8',catchupCaps:skips,gripForceCapsN:{hand:160,other:380},stability:{...stability},...profileSnapshot(),screen:[innerWidth,innerHeight],userAgent:navigator.userAgent,at:new Date().toISOString()};
  try{await navigator.clipboard.writeText(JSON.stringify(q,null,2));info.textContent='QA copied';}catch{info.textContent='Clipboard unavailable';}
 };
 document.addEventListener('visibilitychange',()=>{last=null;acc=0;if(document.hidden)visibilityInterruptions++;});

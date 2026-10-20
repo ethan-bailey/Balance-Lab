@@ -12,5 +12,5 @@ export function jointMotorCommand({angle,velocity,lower,upper,kp,kd,speedGainSca
  const lowerActive=angle<lower+limitGuard&&velocity<0;
  if(upperActive)speed=Math.min(speed,-clamp((angle-upper+limitGuard)*24+velocity*.8,0,limitCorrectionSpeed));
  if(lowerActive)speed=Math.max(speed,clamp((lower+limitGuard-angle)*24-velocity*.8,0,limitCorrectionSpeed));
- return {speed,limitActive:upperActive||lowerActive};
+ return {speed:clamp(speed,-maxSpeed,maxSpeed),limitActive:upperActive||lowerActive};
 }
