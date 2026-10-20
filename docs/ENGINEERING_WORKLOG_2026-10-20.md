@@ -83,4 +83,4 @@ Known open failure: medium shove does not produce a physical corrective step (8/
 - Executed: `node --test tests/*.test.mjs` -> **38/38 PASS**, exit 0, 25.79 seconds. (Note: `tests/pose-sampler.test.mjs` currently contains no assertions; its file-level load is not counted as validation of sampler correctness.)
 - Open gates: dedicated pose sampler and motor command numerical tests, browser integration and Safari/iPhone evidence, A2 physical stepping, and original character art approval. Active v6 is a prototype, not release-approved. No deployment changed.
 - Replaced the prior placeholder `tests/pose-sampler.test.mjs` (no assertions) with five dedicated sampler/motor numerical tests: clip immutability/interpolation/loop, wrapped-angle blending, rejection of invalid poses and motor inputs, speed/torque limits. Focused 5/5 PASS.
-- Full Node suite re-run after dedicated tests: **43/43 PASS**. This remains separate from browser/device verification.
+- Full Node suite re-run after dedicated tests: **42/42 PASS**. This remains separate from browser/device verification.
