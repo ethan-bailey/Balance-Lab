@@ -24,3 +24,25 @@ This gate executes the *same* `src/qa/a2-physical-gate.mjs` in Node and Chromium
 requiring actual step lift, renewed contact, five-second support, numeric bounds
 and close trajectory parity for both facings and ±8/±10 N·s impulses. It does not
 replace physical iPhone Safari testing or integrate active physics into the M2 UI.
+
+### Opt-in A2 playable candidate
+
+`/lab/active.html` is a **separate** playable A2 candidate, not the stable M2
+preview. It uses the same `createActiveRigWorld` module verified by the Node and
+Chromium physics gates, draws the existing Kite visual rig from actual Planck
+body poses, and connects the preserved A5 pointer lifecycle through the bounded
+physics grip adapter. Release and cancellation do not inject an unverified flick.
+The UI exposes Reset, Drop and Push; append `?facing=-1` to physically reflect
+the rig. Append `?rigqa=1` for deterministic test-only stepping (no RAF).
+
+With the candidate server running on port 9021:
+
+```sh
+node browser/tests/active-preview-smoke.mjs
+```
+
+The smoke gate verifies physical recovery in both facings, actual canvas
+rendering, pointer grab/move/release, blur cancellation, resizing, reload, finite
+rig bodies and no browser exceptions. The full A2 browser source-parity and M2
+baseline regression suites must also pass before any new preview deployment.
+Physical iPhone 16 Safari acceptance remains pending.

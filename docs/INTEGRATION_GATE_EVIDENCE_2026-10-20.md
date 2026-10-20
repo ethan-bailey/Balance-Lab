@@ -67,3 +67,10 @@ Instrument actual joint IDs and relative velocities for the two failing forearm-
 - `node browser/tests/active-a2-browser-gate.mjs` (candidate served on 9021): **8/8 PASS**, both facings, actual liftoff/displaced touchdown, sustained posture/support, max Node/Chromium torso-height delta ~2.31e-9 m, max angle delta ~2.69e-12 rad, zero JS errors.
 - Existing `node browser/tests/full-browser-gate.mjs` (candidate 9021, baseline 9001): **800/800 PASS**, five parity checks PASS, touch/resize/reload PASS, no JS errors.
 - Full Node suite after extraction: **104/104 PASS**. A2 Node physical and active-source Chromium acceptance: **INTEGRATED_PASS for physics QA only**. Active playable renderer/pointer integration: **TODO**; physical iPhone Safari: **PENDING_DEVICE**. Stable preview unchanged; no deployment.
+
+## A2 playable opt-in candidate integrated locally
+
+- New separate route `/lab/active.html`, `browser/lab/active-lab.mjs`: renders the existing Kite art using measured `createActiveRigWorld` Planck body poses, real 120 Hz stepping, actual contacts, A2 recovery motor targets and finite physical grip. No new placeholder physics, direct body transforms, or alternate health/state graphs.
+- A5 input integration: `createRigGripBinding` + `attachCanvasPointerInput` handle pointer capture, move, release, blur cancellation, lost capture and zero synthetic flick. Stable M2 `lab.mjs` is untouched.
+- `node browser/tests/active-preview-smoke.mjs`: **PASS** on mobile Chromium 393×793 and rotated 793×393; real physical recovery for both facing orientations, pointer release and cancellation, resize/reload, zero browser errors. Separate `?rigqa=1` disables animation frame stepping for deterministic QA only.
+- New active playable path is a candidate, **not yet an accepted production preview**. Physical iPhone 16 Safari, sustained on-device performance and user interaction/art QA are **PENDING_DEVICE / PENDING_USER**.
