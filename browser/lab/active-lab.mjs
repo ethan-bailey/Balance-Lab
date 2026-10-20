@@ -7,8 +7,8 @@ import {createSideProfileGesture,GESTURES} from '/src/animation/side-profile-ges
 import {createFacingRig} from '/src/config/facing-rig.mjs';
 import {createRigGripBinding} from '/src/input/rig-grip-binding.mjs';
 import {attachCanvasPointerInput} from '/src/input/canvas-pointer.mjs';
-import {drawCharacterSegment,drawCharacterHead,drawingOrder,validateVisualRig} from './m2-visual-rig.mjs';
-validateVisualRig();
+import {drawSideViewSegment,drawSideViewHead,sideViewDrawingOrder,validateSideViewRig} from './side-view-character.mjs';
+validateSideViewRig();
 const DT=1/120,CAP=4,FLOOR=.86,clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 const canvas=document.querySelector('#scene'),ctx=canvas.getContext('2d',{alpha:false});
 const status=document.querySelector('#status'),info=document.querySelector('#info');
@@ -49,13 +49,13 @@ function draw(alpha){
  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.fillStyle='#0c1622';ctx.fillRect(0,0,width,height);
  const floorY=height*FLOOR;ctx.fillStyle='#233745';ctx.fillRect(0,floorY,width,height-floorY);
  ctx.strokeStyle='#496477';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,floorY);ctx.lineTo(width,floorY);ctx.stroke();
- for(const id of drawingOrder()){
+ for(const id of sideViewDrawingOrder(facing)){
   const def=active.rig.parts.get(id)?.def;if(!def)throw Error('Missing visual segment '+id);
   const q=pose(id,alpha),p=screen(q.x,q.y);ctx.save();ctx.translate(p.x,p.y);ctx.rotate(-q.a);
-  drawCharacterSegment(ctx,id,def.w,def.h,scale);ctx.restore();
+  drawSideViewSegment(ctx,id,def.w,def.h,scale,facing);ctx.restore();
  }
  const torso=pose('torso',alpha),neck=screen(torso.x,torso.y);
- ctx.save();ctx.translate(neck.x,neck.y);ctx.rotate(-torso.a);drawCharacterHead(ctx,scale,{blink:false});ctx.restore();
+ ctx.save();ctx.translate(neck.x,neck.y);ctx.rotate(-torso.a);drawSideViewHead(ctx,scale,facing);ctx.restore();
  drawCalls++;
 }
 function perf(){return {uptimeSeconds:(performance.now()-started)/1000,frameP95Ms:percentile(intervals,.95),
@@ -89,7 +89,7 @@ for(const [id,action] of Object.entries(actions))document.querySelector('#'+id)?
 document.querySelectorAll('[data-gesture]').forEach(b=>b.addEventListener('click',()=>setGesture(b.dataset.gesture)));
 reset();
 setGesture(gesture);
-info.textContent='Side-profile character · choose a pose, drag a limb, push, or drop. Animation is force-limited; Planck determines actual motion.';
+info.textContent='True side-view humanoid · one visible eye, forward-facing nose and boots. Drag limbs, pose, push or drop; Planck controls every physical segment.';
 window.__balanceActivePreviewQA={
  sample:()=>({rig:active.snapshot(),steps:active.getStepDiagnostics(),mode:active.getState(),pointer:{...tracker.metrics},gesture,perf:perf()}),
  step:n=>{if(!manualQA)throw Error('Manual stepping only in rigqa mode');const result=step(n);draw(1);return result;},

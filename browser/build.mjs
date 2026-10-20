@@ -13,6 +13,7 @@ await cp('../adapters','dist/adapters',{recursive:true,force:true});
 await copyFile('../rig-config.mjs','dist/rig-config.mjs');
 await copyFile('lab/active.html','dist/lab/active.html');
 await copyFile('lab/active-lab.mjs','dist/lab/active-lab.mjs');
+await copyFile('lab/side-view-character.mjs','dist/lab/side-view-character.mjs');
 const planckAdapter=await readFile('dist/adapters/planck.mjs','utf8');
 if(!planckAdapter.includes("from 'planck'"))throw Error('Planck adapter import not found');
 await writeFile('dist/adapters/planck.mjs',planckAdapter.replace("from 'planck'","from '../vendor/planck.mjs'"));
