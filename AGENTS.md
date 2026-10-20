@@ -1,5 +1,5 @@
 # Balance Lab — mandatory contributor instructions
-**Primary execution plan:** docs/PHYSICS_AI_ROADMAP.md. Read it before any development, verification, refactor, review, merge or deployment. It extends, and does not erase, the original MASTER_PLAN.md and preserved M0–M8 acceptance gates.
+**Primary execution plan:** docs/PHYSICS_AI_ROADMAP.md. **Mandatory integration and gate bookkeeping:** docs/INTEGRATION_WORKFLOW.md. Read it before any development, verification, refactor, review, merge or deployment. It extends, and does not erase, the original MASTER_PLAN.md and preserved M0–M8 acceptance gates.
 
 ## Architecture lock
 Only the physics engine writes simulated transforms. Behavior selects intent; animation yields desired joint poses; balance/reflex layers modify targets; bounded joint motors try to track them; simulated contacts and momentum determine reality. No body teleport, foot pin, infinite force, artificial success, copied Euphoria or other proprietary source/assets. Maintain fixed 120Hz stepping and iPhone 16 performance discipline.
