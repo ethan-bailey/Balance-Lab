@@ -1,6 +1,11 @@
 /** Ground contact and mass-weighted COM, in metres (Planck y-up).
  * Perception only: never pins or teleports bodies.
  */
+export function capturePoint1D({x,y,vx},{gravity=9.81,minHeight=.25}={}){
+ if(![x,y,vx,gravity,minHeight].every(Number.isFinite)||gravity<=0||minHeight<=0)throw Error('Invalid capture point input');
+ if(y<=0)return null;
+ return x+vx*Math.sqrt(Math.max(y,minHeight)/gravity);
+}
 export function estimateSupport(world,ground,parts,{horizonSeconds=0.18}={}){
  if(!Number.isFinite(horizonSeconds)||horizonSeconds<0||horizonSeconds>1)throw Error('Invalid prediction horizon');
  const touched=new Set();
@@ -26,6 +31,8 @@ export function estimateSupport(world,ground,parts,{horizonSeconds=0.18}={}){
   minX=Math.min(minX,p.x-half);maxX=Math.max(maxX,p.x+half);
  }
  const projectedX=com.x+com.vx*horizonSeconds;
+ const captureX=touched.size?capturePoint1D(com):null;
+ const captureMargin=touched.size?Math.min(captureX-minX,maxX-captureX):null;
  const margin=touched.size?Math.min(projectedX-minX,maxX-projectedX):null;
- return {com,contactCount:touched.size,feet:[...touched].sort(),support:touched.size?{minX,maxX,projectedX,margin}:null,margin};
+ return {com,contactCount:touched.size,feet:[...touched].sort(),support:touched.size?{minX,maxX,projectedX,captureX,captureMargin,margin}:null,margin,captureX,captureMargin};
 }
