@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createMotorTelemetry} from '../src/physics/motor-telemetry.mjs';
+test('MT01 rejects invalid and duplicate joints',()=>{assert.throws(()=>createMotorTelemetry([]));assert.throws(()=>createMotorTelemetry(['a','a']));});
+test('MT02 initializes zero counters',()=>{const s=createMotorTelemetry(['a']).snapshot();assert.equal(s.total.samples,0);assert.equal(s.substeps,0);});
+test('MT03 signed motor work',()=>{const m=createMotorTelemetry(['a']);m.sample('a',5,2,.01,10);m.sample('a',-4,3,.01,10);const t=m.snapshot().total;assert.ok(Math.abs(t.netWorkJ+.02)<1e-10);assert.ok(Math.abs(t.absoluteWorkJ-.22)<1e-10);});
+test('MT04 peak torque power and saturation',()=>{const m=createMotorTelemetry(['a']);m.sample('a',9.9,2,.01,10);const t=m.snapshot().total;assert.equal(t.saturatedSamples,1);assert.equal(t.peakTorqueNm,9.9);assert.equal(t.peakPowerW,19.8);});
+test('MT05 invalid samples do not mutate',()=>{const m=createMotorTelemetry(['a']);assert.throws(()=>m.sample('a',NaN,1,.01,10));assert.throws(()=>m.sample('a',1,1,0,10));assert.equal(m.snapshot().total.samples,0);});
+test('MT06 snapshots detached and reset',()=>{const m=createMotorTelemetry(['a']);m.sample('a',1,2,.01,10);const s=m.snapshot();s.joints.a.samples=99;assert.equal(m.snapshot().joints.a.samples,1);m.reset();assert.equal(m.snapshot().total.samples,0);});
+test('MT07 deterministic replay',()=>{const run=()=>{const m=createMotorTelemetry(['a']);for(let i=0;i<200;i++){m.nextSubstep();m.sample('a',Math.sin(i),Math.cos(i),1/240,10);}return m.snapshot();};assert.deepEqual(run(),run());});
