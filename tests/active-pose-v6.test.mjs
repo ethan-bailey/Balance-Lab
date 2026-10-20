@@ -31,3 +31,28 @@ test('opt-in disabled by default and rejects unknown joints',()=>{
  r.setPoseClip(clip);r.step(2);r.setPoseClip(null);r.step(2);
  assert.equal(r.snapshot().metrics.nonfinite,0);r.dispose();
 });
+test('activation and clip switching preserve simulated pose and deterministic replay',()=>{
+ const a=createActiveRigWorld(),b=createActiveRigWorld();
+ const reach=createPoseClip([{time:0,pose:{shoulderL:-.5}},{time:.7,pose:{shoulderL:.5}}]);
+ for(const r of [a,b])r.step(120);
+ const old=a.snapshot();
+ a.setPoseClip(clip,{fadeSeconds:.3});
+ assert.deepEqual(a.snapshot(),old,'changing target cannot teleport any physical body');
+ b.setPoseClip(clip,{fadeSeconds:.3});
+ for(const r of [a,b])r.step(40);
+ const before=a.snapshot();
+ a.setPoseClip(reach,{fadeSeconds:.2});b.setPoseClip(reach,{fadeSeconds:.2});
+ assert.deepEqual(a.snapshot(),before,'crossfade cannot directly modify body positions');
+ for(const r of [a,b]){r.step(180);r.setPoseClip(null);r.step(40);}
+ assert.deepEqual(a.snapshot(),b.snapshot(),'pose sampling and switching replay deterministically');
+ assert.equal(a.snapshot().metrics.nonfinite,0);
+ a.dispose();b.dispose();
+});
+test('pose fades validate duration and do not disable the default controller on error',()=>{
+ const r=createActiveRigWorld();
+ assert.throws(()=>r.setPoseClip(clip,{fadeSeconds:Infinity}),/Invalid pose fade/);
+ assert.throws(()=>r.setPoseClip(clip,{fadeSeconds:-1}),/Invalid pose fade/);
+ r.step(30);
+ assert.equal(r.snapshot().metrics.nonfinite,0);
+ r.dispose();
+});

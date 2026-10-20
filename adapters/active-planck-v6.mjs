@@ -1,4 +1,4 @@
-import {samplePose} from '../src/animation/pose-sampler.mjs';
+import {samplePose,blendPose} from '../src/animation/pose-sampler.mjs';
 import {poseMotorCommand} from '../src/actuation/pose-motor.mjs';
 import {RIG} from '../rig-config.mjs';
 import {createRigWorld,FIXED_DT} from './planck.mjs';
@@ -9,20 +9,29 @@ export function createActiveRigWorld(base=RIG){
  const config={...base,motor:{...base.motor}},rig=createRigWorld(config);
  const sensor=attachFootImpactSensor(rig.world,rig.ground,rig.parts),state=createBalanceState();
  let grabbed=false,priorFeet=new Set(),priorVy={footL:0,footR:0},mode={mode:'airborne',age:0,canActuate:false};
- let poseClip=null,poseTime=0,poseLoop=false,recoverySeconds=0,impacts=sensor.snapshot(),support=estimateSupport(rig.world,rig.ground,rig.parts);
+ let poseClip=null,poseTime=0,poseLoop=false,poseFrame=null,fadeOrigin=null,fadeAge=0,fadeSeconds=0,recoverySeconds=0,impacts=sensor.snapshot(),support=estimateSupport(rig.world,rig.ground,rig.parts);
  const torque={standing:8,catching:24,stepping:20,airborne:18,tumbling:8,fallen:8,grabbed:10};
  const diagnostics={modeCounts:{},landingEvents:0,maxImpactSpeed:0};
 // continued
- function setPoseClip(clip,{loop=false}={}){
+ /** Opt-in animation target: the solver remains the only authority for body poses.
+  * A finite fade begins at the joints' *measured* angles to avoid motor-command jumps.
+  * The animation pose is sampled once per 120 Hz simulation step.
+  */
+ function setPoseClip(clip,{loop=false,fadeSeconds:fadeDuration=.18}={}){
   if(clip!==null&&(!Array.isArray(clip)||!clip.length))throw Error('Invalid pose clip');
   if(typeof loop!=='boolean')throw Error('Invalid loop mode');
+  if(!Number.isFinite(fadeDuration)||fadeDuration<0||fadeDuration>5)throw Error('Invalid pose fade');
   if(clip!==null){
    const known=new Set(rig.links.map(({def})=>def.id));
    for(const id of Object.keys(clip[0].pose))if(!known.has(id))throw Error('Unknown pose joint '+id);
   }
   poseClip=clip;poseTime=clip?.[0].time??0;poseLoop=loop;
+  fadeAge=0;fadeSeconds=fadeDuration;
+  fadeOrigin=clip===null?null:Object.freeze(Object.fromEntries(rig.links.filter(
+   ({def})=>Object.hasOwn(clip[0].pose,def.id)).map(({def,joint})=>[def.id,joint.getJointAngle()])));
+  poseFrame=clip===null?null:fadeOrigin;
   rig.setPoseController(clip===null?null:({id,angle,angularVelocity})=>{
-   const target=samplePose(poseClip,poseTime,{loop:poseLoop})[id];
+   const target=poseFrame[id];
    return target===undefined?undefined:poseMotorCommand({angle,angularVelocity,targetAngle:target,
     maxTorque:id.startsWith('wrist')?config.motor.wristMaxTorque:config.motor.maxTorque,
     kp:config.motor.kp,kd:config.motor.kd,maxSpeed:config.motor.maxSpeed,
@@ -45,7 +54,14 @@ export function createActiveRigWorld(base=RIG){
    if(mode.mode==="catching")recoverySeconds=2;else recoverySeconds=Math.max(0,recoverySeconds-FIXED_DT);config.motor.maxTorque=mode.mode==="standing"&&recoverySeconds>0?18:torque[mode.mode];
    priorFeet=feet;
    for(const id of ['footL','footR'])priorVy[id]=rig.parts.get(id).body.getLinearVelocity().y;
-   sensor.reset();rig.step();if(poseClip)poseTime+=FIXED_DT;impacts=sensor.snapshot();
+   if(poseClip){
+    const sampled=samplePose(poseClip,poseTime,{loop:poseLoop});
+    poseFrame=fadeSeconds>0&&fadeAge<fadeSeconds
+     ?blendPose(fadeOrigin,sampled,Math.min(1,fadeAge/fadeSeconds)):sampled;
+   }
+   sensor.reset();rig.step();
+   if(poseClip){poseTime+=FIXED_DT;fadeAge+=FIXED_DT;}
+   impacts=sensor.snapshot();
   }
   return snapshot();
  }

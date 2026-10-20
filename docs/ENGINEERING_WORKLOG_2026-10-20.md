@@ -74,3 +74,11 @@ Known open failure: medium shove does not produce a physical corrective step (8/
 - Syntax check on pose sampler succeeded. Focused legacy active physics tests: 3/3 passed. New module behavioral tests and full integration acceptance remain PENDING, not passed.
 - Next: add executable sampler/motor regression tests; wire an opt-in PoseFrame target path into the canonical rig while preserving the original neutral baseline; verify physically overpowerable motor and crossfade with deterministic replay. Only then proceed to contact-confirmed corrective stepping.
 - M2 Safari and art gates remain pending. Existing deployed M2 and M1 rollback unchanged. No cloud CI or deployment used.
+
+## A1 opt-in pose-controller refinement (2026-10-20)
+- Continued development from remote-backed branch `backup/sandbox-wip-20261020`; preserved stable `main` and existing release.
+- Refined `adapters/active-planck-v6.mjs`: samples immutable pose once per 120Hz outer physics step, caches target frame for all joint callbacks, and ramps new clip targets from actual joint angles over a validated finite duration (default 0.18 seconds); still drives only bounded Planck joint motors.
+- `setPoseClip(null)` keeps the legacy controller path and clears the animation target; arbitrary external impulses can still overpower motors; no direct body transform writes.
+- Added tests covering transition switch no-teleport, deterministic clip changes, fade validation and existing external-force override.
+- Executed: `node --test tests/*.test.mjs` -> **38/38 PASS**, exit 0, 25.79 seconds. (Note: `tests/pose-sampler.test.mjs` currently contains no assertions; its file-level load is not counted as validation of sampler correctness.)
+- Open gates: dedicated pose sampler and motor command numerical tests, browser integration and Safari/iPhone evidence, A2 physical stepping, and original character art approval. Active v6 is a prototype, not release-approved. No deployment changed.
