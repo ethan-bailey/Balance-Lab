@@ -1,1 +1,0 @@
- function grab(id,target,point){rig.grab(id,target,point);grabbed=true;}

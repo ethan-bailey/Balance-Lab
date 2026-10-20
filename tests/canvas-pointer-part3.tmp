@@ -1,8 +1,0 @@
- return ()=>{
-  tracker.cancel();
-  for(const [type,fn] of handlers)canvas.removeEventListener(type,fn);
-  windowRef?.removeEventListener?.('blur',blur);
-  documentRef?.removeEventListener?.('visibilitychange',hidden);
-  if(canvas.style)canvas.style.touchAction=original;
- };
-}

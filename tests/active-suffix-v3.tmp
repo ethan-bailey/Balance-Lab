@@ -1,9 +1,0 @@
- function grab(id,target,point){rig.grab(id,target,point);grabbed=true;}
- function release(){rig.release();grabbed=false;}
- function getState(){return {mode:mode.mode,age:mode.age,canActuate:mode.canActuate};}
- function getDiagnostics(){return {landingEvents:diagnostics.landingEvents,maxImpactSpeed:diagnostics.maxImpactSpeed,modeCounts:{...diagnostics.modeCounts}};}
- return {rig,step,snapshot,grab,release,moveGrab:rig.moveGrab,
-  impulse:rig.impulse,parts:rig.parts,metrics:rig.metrics,
-  getState,getDiagnostics,getSupport(){return support;},
-  getImpacts(){return impacts;},dispose(){sensor.detach();}};
-}

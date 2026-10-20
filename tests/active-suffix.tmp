@@ -1,4 +1,0 @@
- function grab(id,target,point){rig.grab(id,target,point);grabbed=true;}
- function release(){rig.release();grabbed=false;}
- return {step,snapshot,grab,release};
-}
