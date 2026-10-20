@@ -99,9 +99,9 @@ function simulate(){
  for(const {body} of Object.values(parts)){
   if(Math.abs(body.getAngularVelocity())>12||body.getLinearVelocity().length()>2.5){highMotion=true;break;}
  }
- const substeps=grab?12:highMotion?3:2;
+ const substeps=grab?8:highMotion?3:2;
  if(substeps===3)stability.adaptiveThreeSubstepFrames++;
- if(grab){stability.grabEightSubstepFrames++;if(grab.id.startsWith('hand'))stability.handEightSubstepFrames++;}
+ if(substeps===8){stability.grabEightSubstepFrames++;if(grab.id.startsWith('hand'))stability.handEightSubstepFrames++;}
  for(let sub=0;sub<substeps;sub++){
   if(grab){
    const b=parts[grab.id].body;
